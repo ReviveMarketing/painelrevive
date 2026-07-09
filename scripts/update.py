@@ -307,7 +307,8 @@ def generate_html(campanhas, stats):
     tipos_sorted = sorted(stats['tipos'].items(), key=lambda x: -x[1]['spent'])
     monthly_sorted = dict(sorted(stats['monthly'].items()))
     
-    now_pt = datetime.now().strftime('%d/%m/%Y %H:%M')
+    from datetime import timezone, timedelta
+    now_pt = (datetime.now(timezone.utc) - timedelta(hours=3)).strftime('%d/%m/%Y %H:%M')
     
     replacements = {
         '{{JS_DATA}}': js_data,

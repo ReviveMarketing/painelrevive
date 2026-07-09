@@ -1,0 +1,39 @@
+name: Atualizar Dashboard ReVive
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 11 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Puxar dados da Meta Ads e gerar dashboard
+        env:
+          META_TOKEN: ${{ secrets.META_TOKEN }}
+          AD_ACCOUNT_ID: ${{ secrets.AD_ACCOUNT_ID }}
+        run: python scripts/update.py
+
+      - name: Commit e push das mudancas
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --staged --quiet; then
+            echo "Nenhuma mudanca no dashboard."
+          else
+            git commit -m "🔄 Atualização automática do dashboard"
+            git push
+          fi

@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 """
-Atualiza o dashboard ReVive puxando dados frescos da Meta Ads API.
-Requer env vars: META_TOKEN e AD_ACCOUNT_ID
+Atualiza o dashboard ReVive puxando dados da Meta Ads API.
+Requer env vars: META_TOKEN e AD_ACCOUNT_ID.
+
+VERSAO 2 - Adiciona snapshot historico embebido no HTML pra permitir
+comparativos entre execucoes (hoje vs ontem, atual vs anterior).
+NAO quebra a automacao existente - so adiciona features.
 """
 
 import os
-import json
 import re
+import json
 import sys
 import urllib.request
 import urllib.parse
 import urllib.error
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 
 # ============================================================
@@ -27,10 +31,9 @@ if not META_TOKEN or not AD_ACCOUNT_ID:
     sys.exit(1)
 
 # ============================================================
-# HELPERS
+# HELPERS API
 # ============================================================
 def meta_get(endpoint, params=None):
-    """Faz uma chamada GET na Meta Graph API."""
     params = params or {}
     params['access_token'] = META_TOKEN
     url = f"{BASE_URL}/{endpoint}?{urllib.parse.urlencode(params)}"
@@ -43,7 +46,6 @@ def meta_get(endpoint, params=None):
         raise
 
 def paginate(endpoint, params, max_pages=20):
-    """Puxa todas as paginas de um endpoint."""
     all_data = []
     result = meta_get(endpoint, params)
     all_data.extend(result.get('data', []))
@@ -61,7 +63,7 @@ def paginate(endpoint, params, max_pages=20):
     return all_data
 
 # ============================================================
-# EXTRACTION UTILITIES
+# EXTRACTION
 # ============================================================
 def extract_praca(name):
     n = name.lower()
@@ -105,12 +107,10 @@ def extract_tipo(name):
     return "Outros"
 
 def parse_iso_date(iso_str):
-    """2026-07-07T15:30:00-0300 -> 2026-07-07"""
     if not iso_str: return ""
     return iso_str.split('T')[0]
 
 def parse_iso_to_pt(iso_str):
-    """2026-07-07T... -> 07 de julho de 2026"""
     if not iso_str: return ""
     meses = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"]
     try:
@@ -120,7 +120,6 @@ def parse_iso_to_pt(iso_str):
         return iso_str
 
 def get_insights_metric(insights_data, metric_name):
-    """Extrai um valor de insights, tratando None."""
     if not insights_data: return 0
     val = insights_data.get(metric_name)
     if val is None: return 0
@@ -128,7 +127,6 @@ def get_insights_metric(insights_data, metric_name):
     except: return 0
 
 def get_conversations_started(actions):
-    """Extrai numero de conversas iniciadas de actions."""
     if not actions: return 0
     for action in actions:
         if action.get('action_type') in ['onsite_conversion.messaging_conversation_started_7d', 'messaging_conversation_started_7d']:
@@ -137,7 +135,6 @@ def get_conversations_started(actions):
     return 0
 
 def get_cost_per_conversation(cost_per_action_type):
-    """Extrai custo por conversa."""
     if not cost_per_action_type: return 0
     for cpa in cost_per_action_type:
         if cpa.get('action_type') in ['onsite_conversion.messaging_conversation_started_7d', 'messaging_conversation_started_7d']:
@@ -146,30 +143,83 @@ def get_cost_per_conversation(cost_per_action_type):
     return 0
 
 # ============================================================
-# FETCH DATA
+# SNAPSHOT HISTORY
+# ============================================================
+def extract_prev_snapshot(html_path):
+    """
+    Le o snapshot ATUAL do index.html anterior (tag 'current-snapshot-data').
+    Esse dado virara o 'anterior' pro comparativo do JS nesta nova execucao.
+    """
+    if not os.path.exists(html_path):
+        return None
+    try:
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html = f.read()
+        # Le a tag 'current-snapshot-data' (que foi salva pela execucao anterior)
+        m = re.search(
+            r'<script id="current-snapshot-data" type="application/json">(.*?)</script>',
+            html, re.DOTALL
+        )
+        if m:
+            raw = m.group(1).strip()
+            if raw and raw not in ('null', ''):
+                return json.loads(raw)
+        # Fallback: tenta ler tag antiga (retrocompat com versao anterior do template)
+        m = re.search(
+            r'<script id="prev-snapshot-data" type="application/json">(.*?)</script>',
+            html, re.DOTALL
+        )
+        if m:
+            raw = m.group(1).strip()
+            if raw and raw not in ('null', ''):
+                return json.loads(raw)
+    except Exception as e:
+        print(f"Falha ao ler snapshot anterior: {e}")
+    return None
+
+def build_snapshot(campanhas, stats, timestamp):
+    """Cria snapshot dos dados atuais pra proxima execucao usar de comparativo"""
+    return {
+        "timestamp": timestamp,
+        "totals": {
+            "spent": round(stats["spent"], 2),
+            "conv": stats["conv"],
+            "active": stats["active"],
+            "cap_spent": round(stats["cap_spent"], 2),
+            "cap_conv": stats["cap_conv"],
+            "vag_spent": round(stats["vag_spent"], 2),
+            "vag_conv": stats["vag_conv"],
+        },
+        "campaigns": {
+            c["id"]: {
+                "spent": c["spent"],
+                "conv": c["conv"],
+                "cpa": c["cpa"],
+                "ctr": c["ctr"],
+                "freq": c["freq"],
+            }
+            for c in campanhas
+        }
+    }
+
+# ============================================================
+# FETCH & PROCESS
 # ============================================================
 def fetch_campaigns():
-    """Puxa todas as campanhas com insights."""
     print(f"Puxando campanhas da conta {AD_ACCOUNT_ID}...")
-    
-    # Buscar campanhas (com insights de LIFETIME embutidos)
     fields = (
         "id,name,effective_status,created_time,updated_time,"
         "insights.date_preset(maximum){"
         "spend,frequency,ctr,cpm,reach,impressions,clicks,actions,cost_per_action_type"
         "}"
     )
-    
     campaigns = paginate(f"act_{AD_ACCOUNT_ID}/campaigns", {
         'fields': fields,
         'limit': 100,
     })
     print(f"Total de campanhas encontradas: {len(campaigns)}")
-    
-    # Para ACTIVE, buscar tambem insights recentes (last_30d)
     active_ids = [c['id'] for c in campaigns if c.get('effective_status') == 'ACTIVE']
     print(f"Buscando insights recentes (30d) de {len(active_ids)} campanhas ativas...")
-    
     recent_insights = {}
     for i, cid in enumerate(active_ids):
         try:
@@ -184,23 +234,17 @@ def fetch_campaigns():
             print(f"  falha em {cid}: {e}")
         if (i+1) % 10 == 0:
             print(f"  {i+1}/{len(active_ids)}")
-    
     return campaigns, recent_insights
 
-# ============================================================
-# PROCESS DATA
-# ============================================================
 def process_campaigns(campaigns, recent_insights):
     processed = []
     for c in campaigns:
         is_active = c.get('effective_status') == 'ACTIVE'
         insights = None
-        
         if is_active and c['id'] in recent_insights:
             insights = recent_insights[c['id']]
         elif c.get('insights') and c['insights'].get('data'):
             insights = c['insights']['data'][0]
-        
         spend = get_insights_metric(insights, 'spend')
         freq = get_insights_metric(insights, 'frequency')
         ctr = get_insights_metric(insights, 'ctr')
@@ -208,15 +252,12 @@ def process_campaigns(campaigns, recent_insights):
         reach = int(get_insights_metric(insights, 'reach'))
         impressions = int(get_insights_metric(insights, 'impressions'))
         clicks = int(get_insights_metric(insights, 'clicks'))
-        
         actions = insights.get('actions', []) if insights else []
         cost_per_action = insights.get('cost_per_action_type', []) if insights else []
         conv = get_conversations_started(actions)
         cpa = get_cost_per_conversation(cost_per_action)
-        
         name = c.get('name', '')
         tipo = extract_tipo(name)
-        
         processed.append({
             'id': c['id'],
             'name': name,
@@ -237,9 +278,7 @@ def process_campaigns(campaigns, recent_insights):
             'tipo': tipo,
             'mtype': 'VIDEO' if any(k in name.lower() for k in ['vídeo','video']) else 'IMAGE',
             'segment': 'vaga' if tipo == 'Vaga' else 'captacao',
-            'metric_period': 'ultimos 30 dias' if is_active else 'lifetime',
         })
-    
     processed.sort(key=lambda x: -x['spent'])
     return processed
 
@@ -251,7 +290,6 @@ def compute_stats(campanhas):
     cap_conv = sum(c['conv'] for c in campanhas if c['segment']=='captacao')
     vag_spent = sum(c['spent'] for c in campanhas if c['segment']=='vaga')
     vag_conv = sum(c['conv'] for c in campanhas if c['segment']=='vaga')
-    
     pracas = {}
     for c in campanhas:
         p = c['praca']
@@ -262,7 +300,6 @@ def compute_stats(campanhas):
         if c['status']=='ACTIVE': pracas[p]['active'] += 1
     for p in pracas:
         pracas[p]['cpa'] = pracas[p]['spent']/pracas[p]['conv'] if pracas[p]['conv'] else 0
-    
     tipos = {}
     for c in campanhas:
         t = c['tipo']
@@ -273,7 +310,6 @@ def compute_stats(campanhas):
         if c['status']=='ACTIVE': tipos[t]['active'] += 1
     for t in tipos:
         tipos[t]['cpa'] = tipos[t]['spent']/tipos[t]['conv'] if tipos[t]['conv'] else 0
-    
     by_month = defaultdict(lambda: {'spent':0,'conv':0,'n':0})
     for c in campanhas:
         iso = c.get('created_iso','')
@@ -282,7 +318,6 @@ def compute_stats(campanhas):
             by_month[mkey]['spent'] += c['spent']
             by_month[mkey]['conv'] += c['conv']
             by_month[mkey]['n'] += 1
-    
     return {
         'total': len(campanhas), 'active': active, 'paused': len(campanhas)-active,
         'spent': total_spent, 'conv': total_conv,
@@ -294,22 +329,27 @@ def compute_stats(campanhas):
     }
 
 # ============================================================
-# GENERATE HTML
+# HTML GENERATION
 # ============================================================
-def generate_html(campanhas, stats):
-    """Le o template HTML e injeta os dados."""
+def compare_info_from_snapshot(prev_snapshot, now_pt):
+    """Cria mensagem informativa sobre a comparacao"""
+    if not prev_snapshot or 'timestamp' not in prev_snapshot:
+        return "Primeira execucao — comparativo aparecera na proxima"
+    prev_ts = prev_snapshot['timestamp']
+    return f"Comparado com execucao de {prev_ts}"
+
+def generate_html(campanhas, stats, prev_snapshot, current_snapshot):
     template_path = os.path.join(os.path.dirname(__file__), 'template.html')
     with open(template_path, 'r', encoding='utf-8') as f:
         template = f.read()
-    
     js_data = json.dumps(campanhas, ensure_ascii=False)
     pracas_sorted = sorted(stats['pracas'].items(), key=lambda x: -x[1]['spent'])
     tipos_sorted = sorted(stats['tipos'].items(), key=lambda x: -x[1]['spent'])
     monthly_sorted = dict(sorted(stats['monthly'].items()))
-    
-    from datetime import timezone, timedelta
     now_pt = (datetime.now(timezone.utc) - timedelta(hours=3)).strftime('%d/%m/%Y %H:%M')
-    
+    compare_info = compare_info_from_snapshot(prev_snapshot, now_pt)
+    prev_json = json.dumps(prev_snapshot, ensure_ascii=False) if prev_snapshot else "null"
+    current_json = json.dumps(current_snapshot, ensure_ascii=False)
     replacements = {
         '{{JS_DATA}}': js_data,
         '{{PRACAS}}': json.dumps(pracas_sorted, ensure_ascii=False),
@@ -320,6 +360,9 @@ def generate_html(campanhas, stats):
         '{{ACTIVE}}': str(stats['active']),
         '{{PAUSED}}': str(stats['paused']),
         '{{SPENT}}': f'{stats["spent"]:,.0f}'.replace(',','.'),
+        '{{SPENT_RAW}}': str(round(stats['spent'], 2)),
+        '{{TOTAL_CONV}}': f'{stats["conv"]:,}'.replace(',','.'),
+        '{{TOTAL_CONV_RAW}}': str(stats['conv']),
         '{{CAP_SPENT}}': f'{stats["cap_spent"]:,.0f}'.replace(',','.'),
         '{{VAG_SPENT}}': f'{stats["vag_spent"]:,.0f}'.replace(',','.'),
         '{{CAP_N}}': str(stats['cap_n']),
@@ -329,11 +372,12 @@ def generate_html(campanhas, stats):
         '{{CAP_CONV}}': f'{stats["cap_conv"]:,}'.replace(',','.'),
         '{{VAG_CONV}}': f'{stats["vag_conv"]:,}'.replace(',','.'),
         '{{UPDATE_STAMP}}': f'Atualizado em {now_pt}',
+        '{{COMPARE_INFO}}': compare_info,
+        '{{PREV_SNAPSHOT}}': prev_json,
+        '{{CURRENT_SNAPSHOT}}': current_json,
     }
-    
     for k, v in replacements.items():
         template = template.replace(k, v)
-    
     return template
 
 # ============================================================
@@ -341,7 +385,16 @@ def generate_html(campanhas, stats):
 # ============================================================
 def main():
     print(f"[{datetime.now()}] Iniciando atualizacao...")
+    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'index.html')
     
+    # 1. Le snapshot anterior do proprio index.html (pra comparativo)
+    prev_snapshot = extract_prev_snapshot(output_path)
+    if prev_snapshot:
+        print(f"Snapshot anterior carregado (de {prev_snapshot.get('timestamp','?')})")
+    else:
+        print("Nenhum snapshot anterior encontrado (primeira execucao)")
+    
+    # 2. Puxa dados novos
     campaigns, recent_insights = fetch_campaigns()
     processed = process_campaigns(campaigns, recent_insights)
     stats = compute_stats(processed)
@@ -351,14 +404,22 @@ def main():
     print(f"  Captacao: R$ {stats['cap_spent']:.0f} / {stats['cap_conv']} conv")
     print(f"  Vagas: R$ {stats['vag_spent']:.0f} / {stats['vag_conv']} conv")
     
-    html = generate_html(processed, stats)
+    # 3. Gera novo HTML:
+    #    - Tag 'prev-snapshot-data' = snapshot ANTERIOR (JS compara com dados atuais)
+    #    - Tag 'current-snapshot-data' = snapshot ATUAL (proxima execucao lera como anterior)
+    now_pt = (datetime.now(timezone.utc) - timedelta(hours=3)).strftime('%d/%m/%Y %H:%M')
+    current_snapshot = build_snapshot(processed, stats, now_pt)
     
-    output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'index.html')
+    html = generate_html(processed, stats, prev_snapshot, current_snapshot)
+    
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html)
     
     print(f"\n[{datetime.now()}] Dashboard atualizado: {output_path}")
     print(f"Tamanho: {len(html):,} bytes")
+    print(f"Snapshot atual salvo: {len(current_snapshot['campaigns'])} campanhas")
+    if prev_snapshot:
+        print(f"Comparativo disponivel (snapshot de {prev_snapshot.get('timestamp','?')})")
 
 if __name__ == '__main__':
     main()

@@ -324,6 +324,47 @@ html[data-theme="light"] .date-input{color-scheme:light}
 .no-results{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;font-weight:600}
 .no-results i{font-size:40px;color:var(--dim);margin-bottom:12px;display:block}
 
+/* USER NOTES SECTION - Anotações do usuário */
+.notes-section{margin:0 20px 16px;padding:0;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,var(--surfp),var(--surf2));border:1px solid var(--border2)}
+.notes-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.notes-icon{width:34px;height:34px;border-radius:10px;background:var(--grad-purple);display:grid;place-items:center;color:#fff;font-size:16px;flex-shrink:0}
+.notes-title{font-size:13px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:0.05em}
+.notes-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:600}
+.notes-empty{padding:14px 18px 18px}
+.notes-input-wrap{display:flex;flex-direction:column;gap:10px}
+.notes-input{width:100%;min-height:80px;background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--ink);font-family:inherit;font-size:13px;line-height:1.5;outline:none;resize:vertical;transition:.2s}
+.notes-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(130,10,209,0.1)}
+.notes-input::placeholder{color:var(--dim);font-style:italic}
+.notes-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.notes-btn{background:var(--grad-purple);border:none;color:#fff;cursor:pointer;border-radius:10px;padding:9px 16px;font-size:12.5px;font-family:inherit;font-weight:800;display:inline-flex;align-items:center;gap:6px;transition:.2s}
+.notes-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(130,10,209,0.3)}
+.notes-btn-sec{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.notes-btn-sec:hover{background:var(--hover);color:var(--ink);border-color:var(--border2);transform:none;box-shadow:none}
+.notes-btn-del{background:transparent;color:var(--red);border:1px solid transparent}
+.notes-btn-del:hover{background:rgba(255,92,140,0.1);border-color:var(--red);transform:none;box-shadow:none}
+.notes-saved{padding:14px 18px}
+.notes-text{font-size:13.5px;color:var(--ink);line-height:1.6;white-space:pre-wrap;background:var(--surf);border-radius:10px;padding:12px 14px;border-left:3px solid var(--green);font-weight:500}
+.notes-meta{font-size:10.5px;color:var(--dim);margin-top:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
+
+/* CONTEXTUAL ANALYSIS - IA junta métricas + anotação */
+.context-analysis{margin:0 20px 16px;padding:16px 18px;border-radius:16px;background:linear-gradient(135deg,rgba(130,10,209,0.08),rgba(195,155,255,0.03));border:2px solid var(--green);position:relative;overflow:hidden}
+.context-analysis::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad-purple)}
+.context-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-top:4px}
+.context-ico{width:36px;height:36px;border-radius:10px;background:var(--grad-purple);display:grid;place-items:center;color:#fff;font-size:17px;flex-shrink:0;box-shadow:0 4px 12px rgba(130,10,209,0.3)}
+.context-title{font-size:13.5px;font-weight:900;color:var(--green);text-transform:uppercase;letter-spacing:0.05em}
+.context-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:600}
+.context-diagnosis{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed var(--border2);line-height:1.5}
+.context-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.context-tag{font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:0.05em;background:var(--surf2);color:var(--muted);border:1px solid var(--border)}
+.context-tag.hot{background:var(--tag-a-bg);color:var(--tag-a-fg);border-color:transparent}
+.context-tag.warn{background:var(--tag-p-bg);color:var(--tag-p-fg);border-color:transparent}
+.context-tag.crit{background:rgba(255,92,140,0.15);color:var(--red);border-color:transparent}
+.context-recs{font-size:12.5px;color:var(--ink2);line-height:1.7}
+.context-recs ol{margin:0;padding-left:22px}
+.context-recs li{margin-bottom:6px;padding-left:2px}
+.context-recs b{color:var(--ink);font-weight:800}
+.context-recs strong{background:linear-gradient(180deg,transparent 60%,rgba(195,155,255,0.3) 60%);color:var(--ink);font-weight:800;padding:0 2px}
+
 /* RESPONSIVE */
 @media(max-width:1100px){
   .hero-kpis{grid-template-columns:1fr 1fr}
@@ -945,6 +986,250 @@ function getTrend(cid,metric){
   };
 }
 
+// ============ NOTES (localStorage) ============
+function getNote(id){
+  try{
+    const raw=localStorage.getItem("cnote-"+id);
+    if(!raw)return null;
+    return JSON.parse(raw);
+  }catch(e){return null}
+}
+function saveNote(id,text){
+  try{
+    const data={text:text.trim(),ts:new Date().toISOString()};
+    localStorage.setItem("cnote-"+id,JSON.stringify(data));
+    return true;
+  }catch(e){return false}
+}
+function deleteNote(id){
+  try{localStorage.removeItem("cnote-"+id);return true}catch(e){return false}
+}
+function fmtNoteTs(iso){
+  try{
+    const d=new Date(iso);
+    return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"})+" "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){return ""}
+}
+
+function startEditNote(id){
+  const box=document.getElementById("notes-box-"+id);
+  const existing=getNote(id);
+  const initial=existing?existing.text:"";
+  box.innerHTML=`
+    <div class="notes-empty">
+      <div class="notes-input-wrap">
+        <textarea class="notes-input" id="note-input-${id}" placeholder="Descreva o que voce esta vendo qualitativamente...&#10;&#10;Exemplos:&#10;- 'Vem muita gente sem direito, so curiosos'&#10;- 'Time comercial reclamou da qualidade dos leads'&#10;- 'Fechou 5 clientes essa semana, otima qualidade'&#10;- 'Publico fora da regiao, muitos de outras cidades'&#10;&#10;A IA vai cruzar sua observacao com as metricas e sugerir acoes.">${initial.replace(/"/g,"&quot;").replace(/</g,"&lt;")}</textarea>
+        <div class="notes-actions">
+          ${existing?`<button class="notes-btn notes-btn-del" onclick="confirmDeleteNote('${id}')"><i class="ti ti-trash"></i> Apagar</button>`:""}
+          <button class="notes-btn notes-btn-sec" onclick="cancelEditNote('${id}')"><i class="ti ti-x"></i> Cancelar</button>
+          <button class="notes-btn" onclick="doSaveNote('${id}')"><i class="ti ti-device-floppy"></i> Salvar observacao</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>{
+    const ta=document.getElementById("note-input-"+id);
+    if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}
+  },50);
+}
+function doSaveNote(id){
+  const ta=document.getElementById("note-input-"+id);
+  if(!ta)return;
+  const text=ta.value.trim();
+  if(!text){alert("Escreva algo antes de salvar");return}
+  saveNote(id,text);
+  render();
+}
+function cancelEditNote(id){render()}
+function confirmDeleteNote(id){
+  if(confirm("Apagar essa observacao?")){
+    deleteNote(id);
+    render();
+  }
+}
+
+// ============ CONTEXTUAL ANALYSIS (IA baseada em keywords + metricas) ============
+function analyzeNote(note,c){
+  if(!note||!note.text)return null;
+  const t=note.text.toLowerCase();
+  const isVaga=c.segment==="vaga";
+  
+  // Detectar sinais qualitativos
+  const signals={
+    lowQuality: /sem direito|nao qualifica|nao presta|sem fratura|sem dano|curios|so quer saber|so pergunt|nao converte|lead ruim|leads ruins|qualidade ruim|qualidade baixa|nao tem direito|sem lesao|sem lesão/i.test(note.text),
+    volumeHigh: /muita gente|muitos leads|vem muito|volume alto|explodindo|lotando|nao para/i.test(note.text),
+    onlyContact: /salvar contato|so quer contato|so quer o contato|so contato|guardar contato|coletando contato/i.test(note.text),
+    material: /material|informa[cç][aã]o|informativo|so quer saber|panfleto|folder|apostila|ebook/i.test(note.text),
+    priceIssue: /caro|preco|preço|nao quer pagar|reclamou do valor|acha caro|sem dinheiro/i.test(note.text),
+    noUrgency: /nao tem pressa|vai pensar|vou pensar|depois|mais tarde|proxima|semana que vem|mes que vem/i.test(note.text),
+    wrongLocation: /outra cidade|outro estado|fora de area|fora da area|nao e aqui|nao é aqui|nao mora aqui|distante/i.test(note.text),
+    wrongSegment: /aposentado|empresa|pj|pessoa juridica|autonomo|autônomo|nao trabalha|desempregado/i.test(note.text),
+    success: /converteu|fechou|cliente bom|clientes bons|qualidade boa|otim[oa]s? lead|excelente lead|melhor campanha|fechando muito|vend|convertendo bem/i.test(note.text),
+    competitor: /concorrente|outra empresa|outro escritorio|ja tem advogado|ja tem assessoria/i.test(note.text),
+    creativeIssue: /criativo|video|vídeo|texto|arte|gancho|imagem|thumbnail|capa/i.test(note.text),
+    audienceIssue: /publico|público|idade|segmenta[cç][aã]o|persona/i.test(note.text)
+  };
+  
+  const activeSignals=Object.keys(signals).filter(k=>signals[k]);
+  if(activeSignals.length===0){
+    return{
+      diagnosis:"Observacao registrada, mas nao identifiquei sinais claros de problema ou oportunidade. Continue monitorando.",
+      tags:["info"],
+      tagLabels:[{label:"MONITORAR",cls:""}],
+      recs:["Adicione mais detalhes na proxima observacao (ex: 'lead X converteu', 'muita gente sem direito', 'time comercial reclamou') pra IA gerar sugestoes mais especificas."]
+    };
+  }
+  
+  // Metricas atuais
+  const cpaGood=isVaga?5:10;
+  const cpaBad=isVaga?9:15;
+  const highVolume=c.conv>=30;
+  const cheapCpa=c.cpa>0&&c.cpa<=cpaGood;
+  const goodCtr=c.ctr>=1.5;
+  
+  let diagnosis="";
+  let tags=[];
+  let recs=[];
+  
+  // CASO 1: Muito volume + baixa qualidade (CLASSICO!)
+  if(signals.lowQuality&&(highVolume||cheapCpa)){
+    diagnosis=`Sua campanha entrega <b>volume forte</b> (${c.conv} conversas a R$ ${c.cpa.toFixed(2).replace(".",",")}) mas <b>a qualidade dos leads e baixa</b>. Classico caso de gancho amplo demais atraindo curiosos.`;
+    tags.push({label:"VOLUME x QUALIDADE",cls:"crit"});
+    recs.push(`<strong>Adicionar pre-qualificacao no criativo</strong> - Muda o primeiro gancho pra algo eliminatorio, tipo: "Voce teve <b>fratura</b> ou <b>dano corporal</b> comprovado? Se sim, voce pode ter direito a indenizacao."`);
+    recs.push(`<strong>Bot de qualificacao no WhatsApp</strong> - Primeira mensagem automatica pergunta: "Voce teve dano corporal em acidente? (Sim/Nao)". Se responder Nao, encerra sem passar pro atendente.`);
+    recs.push(`<strong>Testar objetivo Leads ao inves de Mensagem</strong> - Cria um formulario com perguntas eliminatorias antes do WhatsApp. So chega no time comercial quem passar no filtro.`);
+    recs.push(`<strong>Segmentar por interesse</strong> - Restringir publico pra pessoas com interesse em direito trabalhista, indenizacoes, DPVAT, ou historico de acidentes. Reduz curiosos.`);
+    if(c.cpa<3){
+      recs.push(`<strong>Considerar REDUZIR o orcamento</strong> - CPA muito baixo com qualidade ruim = escalar volume ruim. Melhor reduzir e otimizar qualidade primeiro.`);
+    }
+  }
+  // CASO 2: Só quer salvar contato
+  else if(signals.onlyContact){
+    diagnosis=`Leads estao vindo apenas para <b>coletar contato</b>, sem intencao real. Isso e sinal de que o criativo esta gerando curiosidade mas nao <b>desejo de resolver</b>.`;
+    tags.push({label:"SEM INTENCAO",cls:"warn"});
+    recs.push(`<strong>Fortalecer o call-to-action</strong> - Em vez de "Fale conosco", usar "Descubra se voce tem direito a X mil reais" (especifico e financeiro).`);
+    recs.push(`<strong>Criar barreira leve</strong> - Pedir CPF ou dados especificos no primeiro contato afasta quem nao esta serio.`);
+    recs.push(`<strong>Provas sociais no criativo</strong> - Mostrar valores reais recebidos por clientes (ex: "Ana recebeu R$ 25.000 apos acidente na moto") - atrai quem quer resultado.`);
+  }
+  // CASO 3: Só material informativo
+  else if(signals.material){
+    diagnosis=`Publico esta buscando apenas <b>informacao gratuita</b>, nao servico. Isso e sinal de gancho educativo demais - atrai audiencia, nao cliente.`;
+    tags.push({label:"EDUCACIONAL DEMAIS",cls:"warn"});
+    recs.push(`<strong>Mudar o gancho para "urgencia"</strong> - Em vez de "Saiba se voce tem direito", usar "Voce esta perdendo dinheiro se nao souber isso agora".`);
+    recs.push(`<strong>Adicionar prazo/gatilho de escassez</strong> - "So ate sexta atendemos gratuitamente" ou "Vagas limitadas essa semana".`);
+    recs.push(`<strong>Separar campanhas</strong> - Criar uma campanha de conteudo (para engajamento e nutricao) e outra de conversao (para leads quentes). Nao misturar.`);
+  }
+  // CASO 4: Localizacao errada
+  else if(signals.wrongLocation){
+    diagnosis=`Leads estao vindo de <b>fora da area de atuacao</b> - segmentacao geografica esta larga demais.`;
+    tags.push({label:"GEO ERRADA",cls:"crit"});
+    recs.push(`<strong>Restringir raio de segmentacao</strong> - No conjunto de anuncios, mudar de "cidade + raio 40km" para so cidade especifica sem raio.`);
+    recs.push(`<strong>Desligar "Advantage+ Public"</strong> - Se estiver ativo, ele amplia geografia automaticamente. Desliga.`);
+    recs.push(`<strong>Adicionar cidades no texto</strong> - "Atendimento apenas em [cidade] e regiao" ja no texto do anuncio filtra visualmente.`);
+  }
+  // CASO 5: Segmento errado
+  else if(signals.wrongSegment){
+    diagnosis=`Publico atingido esta <b>fora do perfil ideal</b> (aposentados, empresas, autonomos quando o servico e para outra persona).`;
+    tags.push({label:"PERSONA ERRADA",cls:"warn"});
+    recs.push(`<strong>Ajustar faixa etaria</strong> - Restringir idade minima/maxima no conjunto de anuncios.`);
+    recs.push(`<strong>Refinar interesses</strong> - Excluir interesses relacionados a "aposentadoria", "MEI", "empreendedorismo" se nao for a persona.`);
+    recs.push(`<strong>Adicionar filtros no texto</strong> - "Para trabalhadores CLT" ou "Para quem tem carteira assinada" filtra na origem.`);
+  }
+  // CASO 6: Sem urgencia
+  else if(signals.noUrgency){
+    diagnosis=`Leads chegam mas <b>nao tomam decisao</b> - falta gatilho de urgencia no funil.`;
+    tags.push({label:"SEM URGENCIA",cls:"warn"});
+    recs.push(`<strong>Adicionar prazo real no atendimento</strong> - "Seu direito prescreve em X anos apos o acidente" - urgencia legitima.`);
+    recs.push(`<strong>Follow-up automatizado</strong> - Sequencia de mensagens no WhatsApp em D+1, D+3, D+7 pra reengajar leads frios.`);
+    recs.push(`<strong>Mudar gancho pra "consequencia da inacao"</strong> - "Cada dia que passa e dinheiro perdido" ao inves de "Descubra seus direitos".`);
+  }
+  // CASO 7: SUCESSO! (elogio)
+  else if(signals.success){
+    diagnosis=`Campanha esta <b>gerando cliente qualificado</b>. Confirmacao qualitativa alem das metricas boas.`;
+    tags.push({label:"ESCALAR",cls:"hot"});
+    recs.push(`<strong>Escalar orcamento gradualmente</strong> - +20% por semana. Nao aumenta muito de uma vez pra nao resetar o algoritmo.`);
+    recs.push(`<strong>Duplicar essa campanha para outras pracas</strong> - Se funciona em [praca atual], testar em cidades similares (mesmo perfil demografico).`);
+    recs.push(`<strong>Documentar o padrao vencedor</strong> - Anota o criativo, texto, publico e horarios. Vira template pra proximas campanhas.`);
+    recs.push(`<strong>Criar campanha lookalike</strong> - Usar quem converteu como base pra Public Similar (1-2%) da Meta.`);
+  }
+  // CASO 8: Concorrencia
+  else if(signals.competitor){
+    diagnosis=`Leads mencionam <b>concorrentes</b> ou "ja tem advogado" - publico esta no fundo do funil, mas com escolha em andamento.`;
+    tags.push({label:"BATALHA COMPETITIVA",cls:"warn"});
+    recs.push(`<strong>Reforcar diferenciais no criativo</strong> - "Advogados especializados em [nicho]", "Casos ganhos em [regiao]", "Sem custo se nao ganhar" (nao ganhou nao pagou).`);
+    recs.push(`<strong>Prova social forte</strong> - Depoimentos em video de clientes reais que trocaram de escritorio e conseguiram melhor resultado.`);
+    recs.push(`<strong>Segunda opiniao gratuita</strong> - Oferecer analise gratuita de casos ja em andamento com outros escritorios.`);
+  }
+  // CASO 9: Criativo cansado
+  else if(signals.creativeIssue){
+    diagnosis=`Observacao aponta para o <b>criativo/comunicacao</b>. Considera trocar arte, video ou gancho.`;
+    tags.push({label:"CRIATIVO",cls:"warn"});
+    if(c.freq>=2){
+      recs.push(`<strong>Freq alta (${c.freq.toFixed(2).replace(".",",")}) confirma</strong> - o publico ja viu esse criativo varias vezes. Renovar e urgente.`);
+    }
+    recs.push(`<strong>Testar 3 novos angulos</strong> - "Financeiro" (quanto voce pode receber), "Emocional" (historia de superacao), "Autoridade" (numeros de casos ganhos).`);
+    recs.push(`<strong>UGC - conteudo de cliente</strong> - Video do proprio cliente contando como recebeu - autenticidade converte mais que producao pofissional.`);
+  }
+  else{
+    diagnosis=`Observacao registrada. Continue monitorando e adicione mais detalhes quando puder.`;
+    tags.push({label:"REGISTRADO",cls:""});
+    recs.push(`Cruzando sua observacao com as metricas (CPA R$ ${c.cpa.toFixed(2).replace(".",",")}, CTR ${c.ctr.toFixed(2).replace(".",",")}%, Freq ${c.freq.toFixed(2).replace(".",",")}), a campanha esta ${c.cpa<=cpaGood?"performando bem":"com pontos de atencao"}.`);
+  }
+  
+  return{diagnosis,tags,recs};
+}
+
+function renderNotesSection(c){
+  const note=getNote(c.id);
+  if(!note){
+    return `<div class="notes-section" id="notes-box-${c.id}">
+      <div class="notes-head">
+        <div class="notes-icon"><i class="ti ti-note"></i></div>
+        <div>
+          <div class="notes-title">Suas observacoes</div>
+          <div class="notes-sub">Anote o que voce ve alem das metricas (qualidade dos leads, feedback do time...)</div>
+        </div>
+      </div>
+      <div class="notes-empty">
+        <div class="notes-input-wrap">
+          <button class="notes-btn" onclick="startEditNote('${c.id}')" style="align-self:flex-start"><i class="ti ti-pencil-plus"></i> Adicionar observacao</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  const analysis=analyzeNote(note,c);
+  const tagsHtml=analysis?analysis.tags.map(t=>`<span class="context-tag ${t.cls||''}">${t.label}</span>`).join(""):"";
+  const analysisHtml=analysis?`
+    <div class="context-analysis">
+      <div class="context-head">
+        <div class="context-ico"><i class="ti ti-sparkles"></i></div>
+        <div>
+          <div class="context-title">Analise contextual</div>
+          <div class="context-sub">IA cruzando sua observacao com as metricas</div>
+        </div>
+      </div>
+      <div class="context-tags">${tagsHtml}</div>
+      <div class="context-diagnosis">${analysis.diagnosis}</div>
+      <div class="context-recs"><b style="display:block;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted)">Sugestoes de acao</b><ol>${analysis.recs.map(r=>`<li>${r}</li>`).join("")}</ol></div>
+    </div>`:"";
+  return `<div class="notes-section" id="notes-box-${c.id}">
+      <div class="notes-head">
+        <div class="notes-icon"><i class="ti ti-note"></i></div>
+        <div>
+          <div class="notes-title">Suas observacoes</div>
+          <div class="notes-sub">Atualizado em ${fmtNoteTs(note.ts)}</div>
+        </div>
+      </div>
+      <div class="notes-saved">
+        <div class="notes-text">${note.text.replace(/</g,"&lt;")}</div>
+        <div class="notes-actions" style="margin-top:10px">
+          <button class="notes-btn notes-btn-del" onclick="confirmDeleteNote('${c.id}')"><i class="ti ti-trash"></i> Apagar</button>
+          <button class="notes-btn notes-btn-sec" onclick="startEditNote('${c.id}')"><i class="ti ti-pencil"></i> Editar</button>
+        </div>
+      </div>
+    </div>
+    ${analysisHtml}`;
+}
+
 function render(){
   const q=document.getElementById("q").value.toLowerCase();
   const sortKey=document.getElementById("sort").value;
@@ -1036,6 +1321,7 @@ function render(){
           <div class="dm"><div class="dml">Alcance</div><div class="dmv">${brNum(c.reach)}</div></div>
           <div class="dm"><div class="dml">Conv/Click</div><div class="dmv">${c.clicks?(c.conv/c.clicks*100).toFixed(1)+"%":"—"}</div></div>
         </div>
+        ${renderNotesSection(c)}
         <div class="dact">
           <a class="dbtn dbtn-o" href="${mgUrl(c.id)}" target="_blank"><i class="ti ti-external-link"></i> Abrir no Gerenciador</a>
           <button class="dbtn dbtn-c" onclick="toggleD('${c.id}')">Fechar</button>

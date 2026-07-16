@@ -365,6 +365,118 @@ html[data-theme="light"] .date-input{color-scheme:light}
 .context-recs b{color:var(--ink);font-weight:800}
 .context-recs strong{background:linear-gradient(180deg,transparent 60%,rgba(195,155,255,0.3) 60%);color:var(--ink);font-weight:800;padding:0 2px}
 
+/* ============ RELATÓRIO MENSAL PDF ============ */
+.report-btn{background:var(--grad-purple);border:none;color:#fff;cursor:pointer;border-radius:12px;padding:9px 16px;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:6px;font-family:inherit;font-weight:700;box-shadow:var(--shadow)}
+.report-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(130,10,209,0.4)}
+.report-overlay{position:fixed;inset:0;background:rgba(10,5,18,0.85);z-index:1000;display:none;overflow-y:auto;padding:20px;backdrop-filter:blur(4px)}
+.report-overlay.on{display:block}
+.report-modal{max-width:900px;margin:0 auto;background:#fff;color:#1a0a2a;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative}
+.report-toolbar{background:#f0e6fa;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid #e0d0e8;position:sticky;top:0;z-index:5}
+.report-toolbar-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.report-toolbar-title{font-size:14px;font-weight:800;color:#5a0790;display:flex;align-items:center;gap:8px}
+.report-select{background:#fff;border:1px solid #d0c0d8;border-radius:10px;padding:8px 12px;color:#1a0a2a;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;outline:none}
+.report-select:hover{border-color:#820ad1}
+.report-toolbar-btns{display:flex;gap:8px;flex-wrap:wrap}
+.report-tool-btn{background:transparent;border:1px solid #d0c0d8;color:#5a0790;cursor:pointer;border-radius:10px;padding:8px 14px;font-size:12.5px;font-family:inherit;font-weight:700;display:flex;align-items:center;gap:6px;transition:.2s}
+.report-tool-btn:hover{background:#820ad1;color:#fff;border-color:#820ad1}
+.report-tool-btn.primary{background:#820ad1;color:#fff;border-color:#820ad1}
+.report-tool-btn.primary:hover{background:#5a0790}
+
+.report-content{padding:40px 48px 48px;font-family:'Manrope',sans-serif;color:#1a0a2a;background:#fff}
+.report-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;padding-bottom:24px;border-bottom:3px solid #820ad1}
+.report-brand{display:flex;align-items:center;gap:14px}
+.report-logo{width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#820ad1,#5a0790);display:grid;place-items:center;font-size:24px;font-weight:900;color:#fff}
+.report-title{font-size:22px;font-weight:900;color:#1a0a2a;letter-spacing:-0.02em;line-height:1.1}
+.report-subtitle{font-size:13px;color:#6a5080;margin-top:4px;font-weight:600}
+.report-meta{text-align:right;font-size:11px;color:#6a5080;line-height:1.6;font-weight:600}
+.report-meta b{color:#1a0a2a;font-weight:800}
+
+.report-section{margin-bottom:32px;page-break-inside:avoid}
+.report-section-title{font-size:11px;font-weight:900;color:#820ad1;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #e8dde5;display:flex;align-items:center;gap:8px}
+.report-section-title i{font-size:16px}
+
+.report-hero-kpis{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.report-kpi-main{background:linear-gradient(135deg,#820ad1,#5a0790);color:#fff;padding:24px;border-radius:16px}
+.report-kpi{background:#faf8fd;border:1px solid #e8dde5;padding:20px;border-radius:16px}
+.report-kpi-lbl{font-size:10px;font-weight:900;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:0.08em}
+.report-kpi .report-kpi-lbl{color:#6a5080}
+.report-kpi-val{font-size:30px;font-weight:900;margin-top:8px;line-height:1;letter-spacing:-0.02em;color:#fff}
+.report-kpi .report-kpi-val{color:#1a0a2a}
+.report-kpi-note{font-size:11.5px;margin-top:6px;color:rgba(255,255,255,0.8);font-weight:600}
+.report-kpi .report-kpi-note{color:#6a5080}
+
+.report-kpis-secondary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.report-kpi-sm{background:#faf8fd;border:1px solid #e8dde5;padding:14px;border-radius:12px;text-align:center}
+.report-kpi-sm-lbl{font-size:9.5px;font-weight:900;color:#6a5080;text-transform:uppercase;letter-spacing:0.06em}
+.report-kpi-sm-val{font-size:20px;font-weight:900;color:#820ad1;margin-top:5px;line-height:1}
+.report-kpi-sm-note{font-size:10.5px;color:#6a5080;margin-top:3px;font-weight:600}
+
+.report-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.report-table th{text-align:left;padding:8px 10px;font-weight:900;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:#6a5080;background:#faf8fd;border-bottom:2px solid #820ad1}
+.report-table th.r{text-align:right}
+.report-table td{padding:9px 10px;border-bottom:1px solid #f0eaf5;color:#1a0a2a;font-weight:600}
+.report-table td.r{text-align:right;font-weight:700}
+.report-table td.g{color:#0f8a5a}
+.report-table td.r-red{color:#c93060}
+.report-table tr:nth-child(even) td{background:#faf8fd}
+.report-table .rank-pos{font-weight:900;color:#820ad1;width:24px}
+
+.report-two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.report-two-col{grid-template-columns:1fr}.report-hero-kpis{grid-template-columns:1fr}.report-kpis-secondary{grid-template-columns:1fr 1fr}}
+
+.report-insights{display:flex;flex-direction:column;gap:8px}
+.report-insight-item{padding:12px 14px;background:#faf8fd;border-left:4px solid #820ad1;border-radius:8px;font-size:12px;line-height:1.5;color:#1a0a2a;font-weight:600}
+.report-insight-item b{font-weight:900;color:#5a0790}
+
+.report-footer{margin-top:40px;padding-top:20px;border-top:1px solid #e8dde5;text-align:center;font-size:10.5px;color:#6a5080;font-weight:600}
+.report-footer b{color:#820ad1;font-weight:800}
+
+/* OBSERVAÇÕES E ANÁLISES NO RELATÓRIO */
+.report-notes-list{display:flex;flex-direction:column;gap:14px}
+.report-note-card{background:#faf8fd;border:1px solid #e8dde5;border-radius:14px;overflow:hidden;page-break-inside:avoid}
+.report-note-head{background:linear-gradient(135deg,#f0e6fa,#faf8fd);padding:12px 16px;border-bottom:1px solid #e8dde5;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.report-note-camp{font-size:12.5px;font-weight:800;color:#1a0a2a;line-height:1.4;flex:1;min-width:0}
+.report-note-tags{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.report-note-badge{font-size:9px;font-weight:800;padding:3px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap}
+.report-note-badge.active{background:#dcf0e4;color:#0f8a5a}
+.report-note-badge.paused{background:#faedcf;color:#8a5a00}
+.report-note-badge.vaga{background:#eef0fc;color:#5a3fbb}
+.report-note-badge.cap{background:#fce6f0;color:#c93060}
+.report-note-badge.praca{background:#f0e6fa;color:#820ad1}
+.report-note-body{padding:14px 16px}
+.report-note-obs{background:#fff;border-left:3px solid #820ad1;padding:10px 14px;border-radius:6px;font-size:11.5px;line-height:1.5;color:#1a0a2a;font-weight:500;white-space:pre-wrap;margin-bottom:12px}
+.report-note-obs-lbl{font-size:9.5px;font-weight:900;color:#6a5080;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.report-note-analysis{background:#fff;border-radius:8px;padding:12px 14px;border:1px dashed #d0c0d8}
+.report-note-analysis-lbl{font-size:9.5px;font-weight:900;color:#820ad1;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.report-note-analysis-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.report-note-atag{font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:0.04em;background:#f0e6fa;color:#820ad1;border:1px solid #d8c0e8}
+.report-note-atag.hot{background:#dcf0e4;color:#0f8a5a;border-color:#a8d8bc}
+.report-note-atag.warn{background:#faedcf;color:#8a5a00;border-color:#e8d09a}
+.report-note-atag.crit{background:#fce6f0;color:#c93060;border-color:#e8b8c8}
+.report-note-diagnosis{font-size:11.5px;color:#1a0a2a;font-weight:600;line-height:1.5;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #f0eaf5}
+.report-note-diagnosis b{color:#5a0790;font-weight:800}
+.report-note-recs{font-size:11px;color:#3a2050;line-height:1.6}
+.report-note-recs ol{margin:0;padding-left:20px}
+.report-note-recs li{margin-bottom:4px}
+.report-note-recs b{color:#1a0a2a;font-weight:800}
+.report-note-recs strong{background:linear-gradient(180deg,transparent 60%,rgba(195,155,255,0.4) 60%);color:#1a0a2a;font-weight:800;padding:0 2px}
+.report-notes-empty{text-align:center;padding:24px;color:#6a5080;font-size:12px;font-weight:600;background:#faf8fd;border-radius:12px;border:1px dashed #d0c0d8}
+.report-notes-empty i{font-size:28px;color:#c0a8d0;margin-bottom:8px;display:block}
+
+/* PRINT STYLES - quando o Renato salvar como PDF */
+@media print {
+  body{background:#fff!important;padding:0!important}
+  .w{max-width:none!important}
+  body > .w{display:none!important}
+  .report-overlay{position:static!important;background:#fff!important;padding:0!important;overflow:visible!important;display:block!important;backdrop-filter:none!important}
+  .report-modal{box-shadow:none!important;border-radius:0!important;max-width:none!important;margin:0!important}
+  .report-toolbar{display:none!important}
+  .report-content{padding:20px 30px!important}
+  .report-section{page-break-inside:avoid}
+  .report-header{page-break-after:avoid}
+  @page{margin:1.5cm;size:A4}
+}
+
 /* RESPONSIVE */
 @media(max-width:1100px){
   .hero-kpis{grid-template-columns:1fr 1fr}
@@ -398,6 +510,10 @@ html[data-theme="light"] .date-input{color-scheme:light}
       </div>
     </div>
     <div class="top-right">
+      <button class="report-btn" onclick="showReport()" title="Gerar relatório mensal em PDF">
+        <i class="ti ti-file-analytics"></i>
+        <span>Relatório</span>
+      </button>
       <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema">
         <i class="ti ti-sun" id="theme-icon"></i>
         <span id="theme-label">Claro</span>
@@ -558,6 +674,23 @@ html[data-theme="light"] .date-input{color-scheme:light}
 <script id="prev-snapshot-data" type="application/json">{{PREV_SNAPSHOT}}</script>
 <!-- SNAPSHOT CURRENT (próxima execução do script lê para virar 'anterior') -->
 <script id="current-snapshot-data" type="application/json">{{CURRENT_SNAPSHOT}}</script>
+
+<!-- RELATÓRIO MENSAL MODAL -->
+<div class="report-overlay" id="report-overlay">
+  <div class="report-modal">
+    <div class="report-toolbar">
+      <div class="report-toolbar-left">
+        <div class="report-toolbar-title"><i class="ti ti-file-analytics"></i> Relatório do período</div>
+        <select class="report-select" id="report-period" onchange="renderReport()"></select>
+      </div>
+      <div class="report-toolbar-btns">
+        <button class="report-tool-btn" onclick="hideReport()"><i class="ti ti-x"></i> Fechar</button>
+        <button class="report-tool-btn primary" onclick="printReport()"><i class="ti ti-download"></i> Salvar como PDF</button>
+      </div>
+    </div>
+    <div class="report-content" id="report-content"></div>
+  </div>
+</div>
 
 <script>
 const C={{JS_DATA}};
@@ -1343,6 +1476,210 @@ function render(){
   }).join("");
 }
 function toggleD(id){openId=openId===id?null:id;render()}
+
+// ============ RELATÓRIO MENSAL PDF ============
+function showReport(){
+  const sel=document.getElementById("report-period");
+  const months=Object.keys(MONTHLY).sort().reverse();
+  const now=new Date();
+  const currentKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const mesesFull=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  let opts=`<option value="ALL">Histórico completo (todas)</option>`;
+  opts+=`<option value="LAST_30">Últimos 30 dias (ativas)</option>`;
+  months.forEach(mkey=>{
+    const p=mkey.split("-");
+    const label=mesesFull[parseInt(p[1])-1]+" "+p[0];
+    const isCurrent=mkey===currentKey?" (atual)":"";
+    opts+=`<option value="${mkey}"${mkey===currentKey?" selected":""}>${label}${isCurrent}</option>`;
+  });
+  sel.innerHTML=opts;
+  document.getElementById("report-overlay").classList.add("on");
+  renderReport();
+}
+function hideReport(){document.getElementById("report-overlay").classList.remove("on")}
+function printReport(){window.print()}
+
+function renderReport(){
+  const period=document.getElementById("report-period").value;
+  const mesesFull=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const now=new Date();
+  const nowStr=now.toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"})+" às "+now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  let campaigns=[];let periodLabel="";let periodSub="";
+  if(period==="ALL"){campaigns=C;periodLabel="Histórico completo";periodSub="Todas as campanhas desde o início";}
+  else if(period==="LAST_30"){campaigns=C.filter(c=>c.status==="ACTIVE");periodLabel="Últimos 30 dias";periodSub="Baseado nas campanhas ativas hoje (janela rolante 30d)";}
+  else {campaigns=C.filter(c=>c.created_iso&&c.created_iso.startsWith(period));const p=period.split("-");periodLabel=mesesFull[parseInt(p[1])-1]+" de "+p[0];periodSub=`Campanhas criadas em ${periodLabel}`;}
+  const totalSpent=campaigns.reduce((s,c)=>s+c.spent,0);
+  const totalConv=campaigns.reduce((s,c)=>s+c.conv,0);
+  const totalActive=campaigns.filter(c=>c.status==="ACTIVE").length;
+  const totalPaused=campaigns.filter(c=>c.status==="PAUSED").length;
+  const avgCpa=totalConv>0?totalSpent/totalConv:0;
+  const cap=campaigns.filter(c=>c.segment==="captacao");
+  const vag=campaigns.filter(c=>c.segment==="vaga");
+  const capSpent=cap.reduce((s,c)=>s+c.spent,0);
+  const capConv=cap.reduce((s,c)=>s+c.conv,0);
+  const vagSpent=vag.reduce((s,c)=>s+c.spent,0);
+  const vagConv=vag.reduce((s,c)=>s+c.conv,0);
+  const topSpent=[...campaigns].sort((a,b)=>b.spent-a.spent).slice(0,10);
+  const topCpa=[...campaigns].filter(c=>c.cpa>0&&c.conv>=5).sort((a,b)=>a.cpa-b.cpa).slice(0,5);
+  const topVol=[...campaigns].sort((a,b)=>b.conv-a.conv).slice(0,5);
+  const byPraca={};
+  campaigns.forEach(c=>{if(!byPraca[c.praca])byPraca[c.praca]={spent:0,conv:0,n:0,active:0};byPraca[c.praca].spent+=c.spent;byPraca[c.praca].conv+=c.conv;byPraca[c.praca].n++;if(c.status==="ACTIVE")byPraca[c.praca].active++;});
+  const pracasArr=Object.entries(byPraca).map(([p,s])=>({p,...s,cpa:s.conv>0?s.spent/s.conv:0})).sort((a,b)=>b.spent-a.spent).slice(0,10);
+  const byTipo={};
+  campaigns.forEach(c=>{if(!byTipo[c.tipo])byTipo[c.tipo]={spent:0,conv:0,n:0};byTipo[c.tipo].spent+=c.spent;byTipo[c.tipo].conv+=c.conv;byTipo[c.tipo].n++;});
+  const tiposArr=Object.entries(byTipo).map(([t,s])=>({t,...s,cpa:s.conv>0?s.spent/s.conv:0})).sort((a,b)=>b.spent-a.spent).slice(0,8);
+  const insights=[];
+  if(cap.length>0&&vag.length>0){const capC=capConv>0?capSpent/capConv:0;const vagC=vagConv>0?vagSpent/vagConv:0;if(capC>0&&vagC>0){const ratio=(capC/vagC).toFixed(1);insights.push(`<b>CAPTAÇÃO vs VAGAS:</b> CPA de captação (R$ ${capC.toFixed(2).replace(".",",")}) foi ${ratio}x maior que CPA de vagas (R$ ${vagC.toFixed(2).replace(".",",")}).`);}}
+  if(pracasArr.length>=3){const best=pracasArr.filter(p=>p.conv>=10).sort((a,b)=>a.cpa-b.cpa)[0];if(best)insights.push(`<b>MELHOR PRAÇA:</b> ${best.p} entregou <b>${best.conv} conversas</b> ao custo médio de <b>R$ ${best.cpa.toFixed(2).replace(".",",")}</b>.`);}
+  const veryHighCpa=campaigns.filter(c=>c.cpa>20&&c.spent>100);
+  if(veryHighCpa.length>0){const totalWaste=veryHighCpa.reduce((s,c)=>s+c.spent,0);insights.push(`<b>ATENÇÃO:</b> ${veryHighCpa.length} campanha${veryHighCpa.length===1?"":"s"} com CPA acima de R$ 20 consumiram R$ ${totalWaste.toFixed(0)} no período.`);}
+  if(topVol[0]&&topVol[0].conv>0)insights.push(`<b>CAMPEÃ EM VOLUME:</b> "${topVol[0].name.substring(0,50)}" gerou ${topVol[0].conv} conversas sozinha.`);
+  if(campaigns.length>0)insights.push(`<b>ATIVIDADE:</b> ${totalActive} campanha${totalActive===1?"":"s"} ativa${totalActive===1?"":"s"} hoje, ${totalPaused} pausada${totalPaused===1?"":"s"}. Total de ${campaigns.length} no período.`);
+  const html=`
+    <div class="report-header">
+      <div class="report-brand">
+        <div class="report-logo">R</div>
+        <div>
+          <div class="report-title">ReVive Assessoria</div>
+          <div class="report-subtitle">Relatório de Performance · Meta Ads</div>
+        </div>
+      </div>
+      <div class="report-meta">
+        Período: <b>${periodLabel}</b><br>
+        ${periodSub}<br><br>
+        Gerado em: <b>${nowStr}</b>
+      </div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title"><i class="ti ti-target"></i> Indicadores principais</div>
+      <div class="report-hero-kpis">
+        <div class="report-kpi-main">
+          <div class="report-kpi-lbl">Investimento total</div>
+          <div class="report-kpi-val">R$ ${totalSpent.toLocaleString("pt-BR",{maximumFractionDigits:0})}</div>
+          <div class="report-kpi-note">${campaigns.length} campanhas · ${totalActive} ativas + ${totalPaused} pausadas</div>
+        </div>
+        <div class="report-kpi">
+          <div class="report-kpi-lbl">Conversas geradas</div>
+          <div class="report-kpi-val">${totalConv.toLocaleString("pt-BR")}</div>
+          <div class="report-kpi-note">via WhatsApp / mensagem</div>
+        </div>
+        <div class="report-kpi">
+          <div class="report-kpi-lbl">CPA médio</div>
+          <div class="report-kpi-val">R$ ${avgCpa.toFixed(2).replace(".",",")}</div>
+          <div class="report-kpi-note">custo por conversa</div>
+        </div>
+      </div>
+      <div class="report-kpis-secondary">
+        <div class="report-kpi-sm">
+          <div class="report-kpi-sm-lbl">Captação</div>
+          <div class="report-kpi-sm-val">R$ ${capSpent.toLocaleString("pt-BR",{maximumFractionDigits:0})}</div>
+          <div class="report-kpi-sm-note">${cap.length} camps · ${capConv.toLocaleString("pt-BR")} conv</div>
+        </div>
+        <div class="report-kpi-sm">
+          <div class="report-kpi-sm-lbl">Vagas</div>
+          <div class="report-kpi-sm-val">R$ ${vagSpent.toLocaleString("pt-BR",{maximumFractionDigits:0})}</div>
+          <div class="report-kpi-sm-note">${vag.length} camps · ${vagConv.toLocaleString("pt-BR")} conv</div>
+        </div>
+        <div class="report-kpi-sm">
+          <div class="report-kpi-sm-lbl">CPA Captação</div>
+          <div class="report-kpi-sm-val">R$ ${(capConv>0?capSpent/capConv:0).toFixed(2).replace(".",",")}</div>
+          <div class="report-kpi-sm-note">custo por conversa</div>
+        </div>
+        <div class="report-kpi-sm">
+          <div class="report-kpi-sm-lbl">CPA Vagas</div>
+          <div class="report-kpi-sm-val">R$ ${(vagConv>0?vagSpent/vagConv:0).toFixed(2).replace(".",",")}</div>
+          <div class="report-kpi-sm-note">custo por conversa</div>
+        </div>
+      </div>
+    </div>
+    ${insights.length>0?`<div class="report-section">
+      <div class="report-section-title"><i class="ti ti-bulb"></i> Insights do período</div>
+      <div class="report-insights">${insights.map(i=>`<div class="report-insight-item">${i}</div>`).join("")}</div>
+    </div>`:""}
+    <div class="report-section">
+      <div class="report-section-title"><i class="ti ti-trophy"></i> Top 10 campanhas por investimento</div>
+      <table class="report-table">
+        <thead><tr><th>#</th><th>Campanha</th><th>Praça</th><th class="r">Gasto</th><th class="r">Conv</th><th class="r">CPA</th></tr></thead>
+        <tbody>
+          ${topSpent.map((c,i)=>`<tr><td class="rank-pos">${i+1}</td><td>${c.name.substring(0,55)}${c.name.length>55?"…":""}</td><td>${c.praca}</td><td class="r">R$ ${c.spent.toFixed(0)}</td><td class="r">${c.conv.toLocaleString("pt-BR")}</td><td class="r ${c.cpa>0&&c.cpa<=10?'g':(c.cpa>15?'r-red':'')}">${c.cpa>0?"R$ "+c.cpa.toFixed(2).replace(".",","):"—"}</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="report-two-col">
+      ${topCpa.length>0?`<div class="report-section">
+        <div class="report-section-title"><i class="ti ti-award"></i> Melhores CPA</div>
+        <table class="report-table">
+          <thead><tr><th>#</th><th>Campanha</th><th class="r">CPA</th></tr></thead>
+          <tbody>${topCpa.map((c,i)=>`<tr><td class="rank-pos">${i+1}</td><td>${c.name.substring(0,40)}${c.name.length>40?"…":""}</td><td class="r g">R$ ${c.cpa.toFixed(2).replace(".",",")}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>`:""}
+      ${topVol.length>0?`<div class="report-section">
+        <div class="report-section-title"><i class="ti ti-chart-bar-popular"></i> Maior volume</div>
+        <table class="report-table">
+          <thead><tr><th>#</th><th>Campanha</th><th class="r">Conv</th></tr></thead>
+          <tbody>${topVol.map((c,i)=>`<tr><td class="rank-pos">${i+1}</td><td>${c.name.substring(0,40)}${c.name.length>40?"…":""}</td><td class="r">${c.conv.toLocaleString("pt-BR")}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>`:""}
+    </div>
+    <div class="report-section">
+      <div class="report-section-title"><i class="ti ti-map-pin"></i> Performance por praça</div>
+      <table class="report-table">
+        <thead><tr><th>Praça</th><th class="r">Campanhas</th><th class="r">Ativas</th><th class="r">Investido</th><th class="r">Conversas</th><th class="r">CPA médio</th></tr></thead>
+        <tbody>${pracasArr.map(p=>`<tr><td><b>${p.p}</b></td><td class="r">${p.n}</td><td class="r">${p.active}</td><td class="r">R$ ${p.spent.toFixed(0)}</td><td class="r">${p.conv.toLocaleString("pt-BR")}</td><td class="r ${p.cpa>0&&p.cpa<=10?'g':(p.cpa>15?'r-red':'')}">${p.cpa>0?"R$ "+p.cpa.toFixed(2).replace(".",","):"—"}</td></tr>`).join("")}</tbody>
+      </table>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title"><i class="ti ti-tag"></i> Distribuição por tipo de campanha</div>
+      <table class="report-table">
+        <thead><tr><th>Tipo</th><th class="r">Campanhas</th><th class="r">Investido</th><th class="r">% do total</th><th class="r">Conversas</th><th class="r">CPA médio</th></tr></thead>
+        <tbody>${tiposArr.map(t=>`<tr><td><b>${t.t}</b></td><td class="r">${t.n}</td><td class="r">R$ ${t.spent.toFixed(0)}</td><td class="r">${totalSpent>0?(t.spent/totalSpent*100).toFixed(1)+"%":"—"}</td><td class="r">${t.conv.toLocaleString("pt-BR")}</td><td class="r ${t.cpa>0&&t.cpa<=10?'g':(t.cpa>15?'r-red':'')}">${t.cpa>0?"R$ "+t.cpa.toFixed(2).replace(".",","):"—"}</td></tr>`).join("")}</tbody>
+      </table>
+    </div>
+    ${(()=>{
+      // Coletar campanhas do período que têm observação salva
+      const withNotes=campaigns.map(c=>({c,note:getNote(c.id)})).filter(x=>x.note&&x.note.text);
+      if(withNotes.length===0)return "";
+      const notesHtml=withNotes.map(({c,note})=>{
+        const analysis=analyzeNote(note,c);
+        const isActive=c.status==="ACTIVE";
+        const isVaga=c.segment==="vaga";
+        const tagsHead=`
+          <span class="report-note-badge ${isActive?'active':'paused'}">${isActive?'Ativa':'Pausada'}</span>
+          <span class="report-note-badge ${isVaga?'vaga':'cap'}">${isVaga?'Vaga':'Captação'}</span>
+          <span class="report-note-badge praca">${c.praca}</span>
+        `;
+        const analysisTagsHtml=analysis&&analysis.tags?analysis.tags.map(t=>`<span class="report-note-atag ${t.cls||''}">${t.label}</span>`).join(""):"";
+        const analysisHtml=analysis?`
+          <div class="report-note-analysis">
+            <div class="report-note-analysis-lbl"><i class="ti ti-sparkles"></i> Análise contextual (IA cruzando observação com métricas)</div>
+            ${analysisTagsHtml?`<div class="report-note-analysis-tags">${analysisTagsHtml}</div>`:""}
+            <div class="report-note-diagnosis">${analysis.diagnosis}</div>
+            ${analysis.recs&&analysis.recs.length>0?`<div class="report-note-recs"><b style="display:block;margin-bottom:6px;font-size:9.5px;text-transform:uppercase;letter-spacing:0.06em;color:#6a5080">Sugestões de ação</b><ol>${analysis.recs.map(r=>`<li>${r}</li>`).join("")}</ol></div>`:""}
+          </div>`:"";
+        return `<div class="report-note-card">
+          <div class="report-note-head">
+            <div class="report-note-camp">${c.name}</div>
+            <div class="report-note-tags">${tagsHead}</div>
+          </div>
+          <div class="report-note-body">
+            <div class="report-note-obs-lbl">Observação registrada · ${fmtNoteTs(note.ts)}</div>
+            <div class="report-note-obs">${note.text.replace(/</g,"&lt;")}</div>
+            ${analysisHtml}
+          </div>
+        </div>`;
+      }).join("");
+      return `<div class="report-section">
+        <div class="report-section-title"><i class="ti ti-notes"></i> Observações e análises estratégicas (${withNotes.length})</div>
+        <div class="report-notes-list">${notesHtml}</div>
+      </div>`;
+    })()}
+    <div class="report-footer">
+      <b>ReVive Assessoria</b> · Painel Meta Ads · revivemarketing.github.io/painelreviver<br>
+      Documento gerado automaticamente · Dados extraídos diretamente da API da Meta
+    </div>
+  `;
+  document.getElementById("report-content").innerHTML=html;
+}
 
 renderChips();
 renderChart();

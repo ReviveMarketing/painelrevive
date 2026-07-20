@@ -463,6 +463,89 @@ html[data-theme="light"] .date-input{color-scheme:light}
 .report-notes-empty{text-align:center;padding:24px;color:#6a5080;font-size:12px;font-weight:600;background:#faf8fd;border-radius:12px;border:1px dashed #d0c0d8}
 .report-notes-empty i{font-size:28px;color:#c0a8d0;margin-bottom:8px;display:block}
 
+/* ============ CALCULADORA CPA REAL ============ */
+.calc-btn{background:var(--surf);border:1px solid var(--border);color:var(--ink);cursor:pointer;border-radius:12px;padding:9px 16px;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:6px;font-family:inherit;font-weight:700;box-shadow:var(--shadow)}
+.calc-btn:hover{transform:translateY(-1px);border-color:var(--green);box-shadow:var(--shadow-hover)}
+.calc-btn i{color:var(--green)}
+.calc-overlay{position:fixed;inset:0;background:rgba(10,5,18,0.85);z-index:1000;display:none;overflow-y:auto;padding:20px;backdrop-filter:blur(4px)}
+.calc-overlay.on{display:block}
+.calc-modal{max-width:820px;margin:0 auto;background:var(--surf);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative}
+.calc-head{background:linear-gradient(135deg,var(--surfp),var(--surf2));padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.calc-head-title{font-size:16px;font-weight:900;color:var(--ink);display:flex;align-items:center;gap:10px}
+.calc-head-title i{width:36px;height:36px;border-radius:10px;background:var(--grad-purple);display:grid;place-items:center;color:#fff;font-size:18px;flex-shrink:0}
+.calc-head-sub{font-size:12px;color:var(--muted);margin-top:4px;font-weight:600;line-height:1.4}
+.calc-close-btn{background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:10px;padding:8px 14px;font-size:12.5px;font-family:inherit;font-weight:700;display:flex;align-items:center;gap:6px;transition:.2s}
+.calc-close-btn:hover{background:var(--hover);color:var(--ink)}
+.calc-body{padding:24px}
+.calc-section{margin-bottom:20px}
+.calc-section-title{font-size:11px;font-weight:900;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.calc-camp-select{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--ink);font-family:inherit;font-size:13px;outline:none;cursor:pointer;font-weight:600}
+.calc-camp-select:hover{border-color:var(--border2)}
+.calc-camp-select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(130,10,209,0.1)}
+.calc-panel-data{background:var(--surf2);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.calc-panel-item{text-align:center}
+.calc-panel-lbl{font-size:9.5px;font-weight:900;color:var(--dim);text-transform:uppercase;letter-spacing:0.06em}
+.calc-panel-val{font-size:18px;font-weight:900;color:var(--ink);margin-top:4px;line-height:1}
+.calc-panel-val.g{color:var(--green)}
+.calc-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.calc-input-wrap{display:flex;flex-direction:column;gap:6px}
+.calc-input-lbl{font-size:11px;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:5px}
+.calc-input-lbl .help{color:var(--dim);cursor:help;font-size:12px}
+.calc-input{background:var(--surf2);border:2px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--ink);font-family:inherit;font-size:16px;font-weight:800;outline:none;transition:.2s;text-align:center}
+.calc-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(130,10,209,0.15)}
+.calc-input::placeholder{color:var(--dim);font-weight:500}
+.calc-hint{font-size:10.5px;color:var(--dim);margin-top:4px;font-weight:500;line-height:1.4}
+.calc-results{background:linear-gradient(135deg,rgba(130,10,209,0.08),rgba(195,155,255,0.04));border:2px solid var(--green);border-radius:14px;padding:18px 20px;display:none}
+.calc-results.on{display:block}
+.calc-results-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.calc-result-item{text-align:center}
+.calc-result-lbl{font-size:9.5px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em}
+.calc-result-val{font-size:24px;font-weight:900;color:var(--ink);margin-top:5px;line-height:1;letter-spacing:-0.02em}
+.calc-result-val.big{font-size:32px;background:var(--grad-purple);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.calc-result-note{font-size:10.5px;color:var(--muted);margin-top:4px;font-weight:600}
+.calc-diagnosis{border-top:1px dashed var(--border2);padding-top:14px;font-size:13px;color:var(--ink);line-height:1.6;font-weight:600}
+.calc-diagnosis b{color:var(--green);font-weight:900}
+.calc-diagnosis .diag-status{display:inline-block;font-size:10px;font-weight:900;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:0.05em;margin-right:8px}
+.calc-diagnosis .diag-status.good{background:var(--tag-a-bg);color:var(--tag-a-fg)}
+.calc-diagnosis .diag-status.warn{background:var(--tag-p-bg);color:var(--tag-p-fg)}
+.calc-diagnosis .diag-status.bad{background:rgba(255,92,140,0.15);color:var(--red)}
+.calc-save-info{margin-top:10px;font-size:10.5px;color:var(--dim);font-weight:600;display:flex;align-items:center;gap:5px}
+@media(max-width:700px){
+  .calc-panel-data{grid-template-columns:1fr 1fr}
+  .calc-inputs{grid-template-columns:1fr}
+  .calc-results-grid{grid-template-columns:1fr}
+}
+
+/* ============ RESPONSÁVEL COMERCIAL ============ */
+.resp-section{margin:0 20px 16px;background:linear-gradient(135deg,var(--surfv),var(--surf2));border:1px solid var(--border2);border-radius:16px;overflow:hidden}
+.resp-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.resp-icon{width:32px;height:32px;border-radius:9px;background:var(--grad-blue);display:grid;place-items:center;color:#fff;font-size:15px;flex-shrink:0}
+.resp-title{font-size:12px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:0.05em}
+.resp-body{padding:12px 16px}
+.resp-empty{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.resp-empty-text{font-size:12.5px;color:var(--muted);font-weight:600}
+.resp-add-btn{background:var(--grad-blue);border:none;color:#fff;cursor:pointer;border-radius:10px;padding:8px 14px;font-size:12px;font-family:inherit;font-weight:800;display:inline-flex;align-items:center;gap:5px;transition:.2s}
+.resp-add-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(90,80,187,0.3)}
+.resp-view{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.resp-view-info{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.resp-view-name{font-size:14px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px}
+.resp-view-phone{font-size:12px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:5px}
+.resp-view-phone i{color:var(--green);font-size:13px}
+.resp-view-actions{display:flex;gap:6px;flex-wrap:wrap}
+.resp-btn-sm{background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:8px;padding:6px 11px;font-size:11.5px;font-family:inherit;font-weight:700;display:inline-flex;align-items:center;gap:5px;transition:.2s;text-decoration:none}
+.resp-btn-sm:hover{background:var(--hover);color:var(--ink);border-color:var(--border2)}
+.resp-btn-sm.wa{color:var(--green);border-color:transparent;background:var(--surf3)}
+.resp-btn-sm.wa:hover{background:var(--green);color:#fff}
+.resp-btn-sm.del{color:var(--red);border-color:transparent}
+.resp-btn-sm.del:hover{background:rgba(255,92,140,0.1);color:var(--red);border-color:var(--red)}
+.resp-edit{display:flex;flex-direction:column;gap:10px}
+.resp-edit-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.resp-edit-input{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--ink);font-family:inherit;font-size:13px;outline:none;transition:.2s;font-weight:600}
+.resp-edit-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(130,10,209,0.1)}
+.resp-edit-input::placeholder{color:var(--dim);font-weight:500}
+.resp-edit-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+@media(max-width:600px){.resp-edit-row{grid-template-columns:1fr}}
+
 /* PRINT STYLES - quando o Renato salvar como PDF */
 @media print {
   body{background:#fff!important;padding:0!important}
@@ -510,6 +593,10 @@ html[data-theme="light"] .date-input{color-scheme:light}
       </div>
     </div>
     <div class="top-right">
+      <button class="calc-btn" onclick="showCalc()" title="Calculadora de custo real por lead qualificado">
+        <i class="ti ti-calculator"></i>
+        <span>Calculadora</span>
+      </button>
       <button class="report-btn" onclick="showReport()" title="Gerar relatório mensal em PDF">
         <i class="ti ti-file-analytics"></i>
         <span>Relatório</span>
@@ -689,6 +776,72 @@ html[data-theme="light"] .date-input{color-scheme:light}
       </div>
     </div>
     <div class="report-content" id="report-content"></div>
+  </div>
+</div>
+
+<!-- CALCULADORA DE CUSTO REAL -->
+<div class="calc-overlay" id="calc-overlay">
+  <div class="calc-modal">
+    <div class="calc-head">
+      <div>
+        <div class="calc-head-title"><i class="ti ti-calculator"></i> Calculadora de custo real por lead qualificado</div>
+        <div class="calc-head-sub">O CPA do painel mostra o custo por CONVERSA. Aqui você descobre o custo por lead REALMENTE útil,<br>cruzando com o feedback do vendedor sobre quantos leads são qualificados de verdade.</div>
+      </div>
+      <button class="calc-close-btn" onclick="hideCalc()"><i class="ti ti-x"></i> Fechar</button>
+    </div>
+    <div class="calc-body">
+      <div class="calc-section">
+        <div class="calc-section-title"><i class="ti ti-target"></i> 1. Selecione a campanha</div>
+        <select class="calc-camp-select" id="calc-camp" onchange="onCalcCampChange()">
+          <option value="">— Escolha uma campanha ativa —</option>
+        </select>
+      </div>
+      <div class="calc-section" id="calc-panel-section" style="display:none">
+        <div class="calc-section-title"><i class="ti ti-chart-bar"></i> 2. Dados do painel (referência)</div>
+        <div class="calc-panel-data" id="calc-panel-data"></div>
+      </div>
+      <div class="calc-section" id="calc-inputs-section" style="display:none">
+        <div class="calc-section-title"><i class="ti ti-user-check"></i> 3. Realidade do vendedor (preencha)</div>
+        <div class="calc-inputs">
+          <div class="calc-input-wrap">
+            <div class="calc-input-lbl">Orçamento diário (R$) <span class="help" title="Quanto essa campanha gasta por dia">💡</span></div>
+            <input type="number" class="calc-input" id="calc-budget" placeholder="30" step="1" min="0" oninput="calcResults()">
+            <div class="calc-hint">Já pré-preenchido baseado no gasto médio</div>
+          </div>
+          <div class="calc-input-wrap">
+            <div class="calc-input-lbl">Leads chegando/dia <span class="help" title="Quantas pessoas efetivamente chamam no WhatsApp por dia (o que o vendedor recebe)">💡</span></div>
+            <input type="number" class="calc-input" id="calc-leads" placeholder="5" step="1" min="0" oninput="calcResults()">
+            <div class="calc-hint">Quantos leads o vendedor recebe/dia</div>
+          </div>
+          <div class="calc-input-wrap">
+            <div class="calc-input-lbl">Leads qualificados/dia <span class="help" title="Leads com PERFIL: mora perto, INSS ativo, acidente recente, etc.">💡</span></div>
+            <input type="number" class="calc-input" id="calc-qualified" placeholder="1" step="0.5" min="0" oninput="calcResults()">
+            <div class="calc-hint">Quantos servem de verdade</div>
+          </div>
+        </div>
+      </div>
+      <div class="calc-results" id="calc-results">
+        <div class="calc-results-grid">
+          <div class="calc-result-item">
+            <div class="calc-result-lbl">Custo bruto/lead</div>
+            <div class="calc-result-val" id="calc-r-gross">R$ —</div>
+            <div class="calc-result-note">Orçamento ÷ leads/dia</div>
+          </div>
+          <div class="calc-result-item">
+            <div class="calc-result-lbl">Custo/lead QUALIFICADO</div>
+            <div class="calc-result-val big" id="calc-r-qualified">R$ —</div>
+            <div class="calc-result-note">Orçamento ÷ qualificados/dia</div>
+          </div>
+          <div class="calc-result-item">
+            <div class="calc-result-lbl">Taxa de qualificação</div>
+            <div class="calc-result-val" id="calc-r-rate">—</div>
+            <div class="calc-result-note">Qualificados ÷ total leads</div>
+          </div>
+        </div>
+        <div class="calc-diagnosis" id="calc-diagnosis"></div>
+        <div class="calc-save-info"><i class="ti ti-device-floppy"></i> <span id="calc-save-status">Salvo automaticamente por campanha</span></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1455,6 +1608,7 @@ function render(){
           <div class="dm"><div class="dml">Conv/Click</div><div class="dmv">${c.clicks?(c.conv/c.clicks*100).toFixed(1)+"%":"—"}</div></div>
         </div>
         ${renderNotesSection(c)}
+        ${renderRespSection(c)}
         <div class="dact">
           <a class="dbtn dbtn-o" href="${mgUrl(c.id)}" target="_blank"><i class="ti ti-external-link"></i> Abrir no Gerenciador</a>
           <button class="dbtn dbtn-c" onclick="toggleD('${c.id}')">Fechar</button>
@@ -1679,6 +1833,186 @@ function renderReport(){
     </div>
   `;
   document.getElementById("report-content").innerHTML=html;
+}
+
+// ============ CALCULADORA CPA REAL ============
+function getCalc(id){try{const r=localStorage.getItem("ccalc-"+id);return r?JSON.parse(r):null;}catch(e){return null;}}
+function saveCalc(id,data){try{localStorage.setItem("ccalc-"+id,JSON.stringify(data));return true;}catch(e){return false;}}
+
+function showCalc(){
+  // Popular dropdown com todas as campanhas ativas ordenadas por gasto
+  const active=C.filter(c=>c.status==="ACTIVE").sort((a,b)=>b.spent-a.spent);
+  const paused=C.filter(c=>c.status==="PAUSED").sort((a,b)=>b.spent-a.spent).slice(0,20);
+  let opts='<option value="">— Escolha uma campanha —</option>';
+  opts+='<optgroup label="ATIVAS">';
+  active.forEach(c=>{opts+=`<option value="${c.id}">${c.name.substring(0,80)}${c.name.length>80?"…":""}</option>`;});
+  opts+='</optgroup>';
+  if(paused.length>0){
+    opts+='<optgroup label="PAUSADAS (top 20 gasto)">';
+    paused.forEach(c=>{opts+=`<option value="${c.id}">${c.name.substring(0,80)}${c.name.length>80?"…":""}</option>`;});
+    opts+='</optgroup>';
+  }
+  document.getElementById("calc-camp").innerHTML=opts;
+  document.getElementById("calc-overlay").classList.add("on");
+  // Reset painel
+  document.getElementById("calc-panel-section").style.display="none";
+  document.getElementById("calc-inputs-section").style.display="none";
+  document.getElementById("calc-results").classList.remove("on");
+}
+function hideCalc(){document.getElementById("calc-overlay").classList.remove("on")}
+
+function onCalcCampChange(){
+  const id=document.getElementById("calc-camp").value;
+  if(!id){
+    document.getElementById("calc-panel-section").style.display="none";
+    document.getElementById("calc-inputs-section").style.display="none";
+    document.getElementById("calc-results").classList.remove("on");
+    return;
+  }
+  const c=C.find(x=>x.id===id);
+  if(!c)return;
+  // Estimar orçamento diário: usar spent dos últimos 30 dias se ativa, ou spent/dias se pausada
+  let budgetGuess=0;
+  const days=daysSince(c.created_iso);
+  if(c.status==="ACTIVE"){
+    // Ativas: painel mostra últimos 30d, então spent/30 é média diária real
+    budgetGuess=c.spent/30;
+  } else {
+    // Pausadas: spent é lifetime, dividir por dias desde criação
+    budgetGuess=days>0?c.spent/days:c.spent;
+  }
+  const convDaily=c.status==="ACTIVE"?c.conv/30:(days>0?c.conv/days:c.conv);
+  // Preencher painel
+  document.getElementById("calc-panel-data").innerHTML=`
+    <div class="calc-panel-item"><div class="calc-panel-lbl">Gasto no período</div><div class="calc-panel-val">R$ ${c.spent.toFixed(0)}</div></div>
+    <div class="calc-panel-item"><div class="calc-panel-lbl">CPA do painel</div><div class="calc-panel-val ${cpaC(c.cpa)}">${c.cpa?"R$ "+br(c.cpa):"—"}</div></div>
+    <div class="calc-panel-item"><div class="calc-panel-lbl">Conversas totais</div><div class="calc-panel-val g">${brNum(c.conv)}</div></div>
+    <div class="calc-panel-item"><div class="calc-panel-lbl">Estimativa/dia</div><div class="calc-panel-val">R$ ${budgetGuess.toFixed(2).replace(".",",")}</div></div>
+  `;
+  document.getElementById("calc-panel-section").style.display="";
+  document.getElementById("calc-inputs-section").style.display="";
+  // Preencher inputs com valores salvos ou estimados
+  const saved=getCalc(id);
+  document.getElementById("calc-budget").value=saved?saved.budget:budgetGuess.toFixed(2);
+  document.getElementById("calc-leads").value=saved?saved.leads:(convDaily>0?Math.round(convDaily*10)/10:"");
+  document.getElementById("calc-qualified").value=saved?saved.qualified:"";
+  calcResults();
+}
+
+function calcResults(){
+  const id=document.getElementById("calc-camp").value;
+  if(!id)return;
+  const budget=parseFloat(document.getElementById("calc-budget").value)||0;
+  const leads=parseFloat(document.getElementById("calc-leads").value)||0;
+  const qualified=parseFloat(document.getElementById("calc-qualified").value)||0;
+  if(budget<=0||leads<=0){
+    document.getElementById("calc-results").classList.remove("on");
+    return;
+  }
+  const grossCost=budget/leads;
+  const qualifiedCost=qualified>0?budget/qualified:0;
+  const rate=leads>0?(qualified/leads)*100:0;
+  document.getElementById("calc-r-gross").textContent="R$ "+grossCost.toFixed(2).replace(".",",");
+  document.getElementById("calc-r-qualified").textContent=qualified>0?"R$ "+qualifiedCost.toFixed(2).replace(".",","):"— defina qualificados";
+  document.getElementById("calc-r-rate").textContent=qualified>0?rate.toFixed(0)+"%":"—";
+  // Diagnóstico
+  const c=C.find(x=>x.id===id);
+  const isVaga=c&&c.segment==="vaga";
+  const targetCpa=isVaga?9:15;
+  let diagStatus,diagStatusClass,diagText;
+  if(qualified<=0){
+    diagText=`<span class="diag-status warn">DEFINIR</span> Informe quantos leads/dia são realmente qualificados pra ver o custo real por lead útil.`;
+  } else if(rate>=50){
+    diagText=`<span class="diag-status good">EXCELENTE</span> Taxa de qualificação de <b>${rate.toFixed(0)}%</b> é ótima. Custo por lead útil de <b>R$ ${qualifiedCost.toFixed(2).replace(".",",")}</b> ${qualifiedCost<=targetCpa?"está dentro da meta":"pode melhorar"}. ${qualifiedCost<=targetCpa?"<b>Manter e escalar</b> — aumentar orçamento gradualmente (+20%/semana).":"Refinar segmentação ou criativo pode reduzir mais."}`;
+  } else if(rate>=25){
+    diagText=`<span class="diag-status warn">OK, MAS DÁ PRA MELHORAR</span> Taxa de qualificação de <b>${rate.toFixed(0)}%</b> significa que ${(100-rate).toFixed(0)}% dos leads não convertem. Custo real por lead útil é <b>R$ ${qualifiedCost.toFixed(2).replace(".",",")}</b> — ${(qualifiedCost/grossCost).toFixed(1)}x mais que o custo bruto. Filtrar melhor no criativo/segmentação pode reduzir muito.`;
+  } else {
+    diagText=`<span class="diag-status bad">CRÍTICO</span> Só <b>${rate.toFixed(0)}%</b> dos leads são qualificados. Você paga <b>R$ ${grossCost.toFixed(2).replace(".",",")}</b> por lead bruto mas <b>R$ ${qualifiedCost.toFixed(2).replace(".",",")}</b> por lead útil — ${(qualifiedCost/grossCost).toFixed(1)}x mais! Prioridade máxima: adicionar filtros de pré-qualificação no criativo (perguntas eliminatórias) e restringir segmentação.`;
+  }
+  document.getElementById("calc-diagnosis").innerHTML=diagText;
+  document.getElementById("calc-results").classList.add("on");
+  // Salvar automaticamente
+  saveCalc(id,{budget,leads,qualified,ts:new Date().toISOString()});
+  document.getElementById("calc-save-status").textContent="Salvo em "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+" (persiste por campanha)";
+}
+
+// ============ RESPONSÁVEL COMERCIAL ============
+function getResp(id){try{const r=localStorage.getItem("cresp-"+id);return r?JSON.parse(r):null;}catch(e){return null;}}
+function saveResp(id,data){try{localStorage.setItem("cresp-"+id,JSON.stringify(data));return true;}catch(e){return false;}}
+function deleteResp(id){try{localStorage.removeItem("cresp-"+id);return true;}catch(e){return false;}}
+
+function startEditResp(id){
+  const box=document.getElementById("resp-box-"+id);
+  const existing=getResp(id);
+  const initName=existing?existing.name:"";
+  const initPhone=existing?existing.phone:"";
+  box.querySelector(".resp-body").innerHTML=`
+    <div class="resp-edit">
+      <div class="resp-edit-row">
+        <input type="text" class="resp-edit-input" id="resp-name-${id}" placeholder="Nome do responsável" value="${initName.replace(/"/g,"&quot;")}">
+        <input type="tel" class="resp-edit-input" id="resp-phone-${id}" placeholder="(48) 99999-9999" value="${initPhone.replace(/"/g,"&quot;")}">
+      </div>
+      <div class="resp-edit-actions">
+        <button class="resp-btn-sm" onclick="cancelEditResp('${id}')"><i class="ti ti-x"></i> Cancelar</button>
+        <button class="resp-btn-sm" style="background:var(--grad-green);color:#fff;border:none" onclick="doSaveResp('${id}')"><i class="ti ti-device-floppy"></i> Salvar</button>
+      </div>
+    </div>
+  `;
+  setTimeout(()=>{const el=document.getElementById("resp-name-"+id);if(el)el.focus();},50);
+}
+function cancelEditResp(id){render()}
+function doSaveResp(id){
+  const name=document.getElementById("resp-name-"+id).value.trim();
+  const phone=document.getElementById("resp-phone-"+id).value.trim();
+  if(!name){alert("Digite o nome do responsável");return}
+  saveResp(id,{name,phone,ts:new Date().toISOString()});
+  render();
+}
+function confirmDeleteResp(id){
+  if(confirm("Remover o responsável dessa campanha?")){deleteResp(id);render();}
+}
+function waLink(phone){
+  const clean=phone.replace(/\D/g,"");
+  if(!clean)return null;
+  const withCountry=clean.length>=11?"55"+clean:(clean.length===10?"55"+clean:clean);
+  return"https://wa.me/"+withCountry;
+}
+function renderRespSection(c){
+  const resp=getResp(c.id);
+  if(!resp){
+    return `<div class="resp-section" id="resp-box-${c.id}">
+      <div class="resp-head">
+        <div class="resp-icon"><i class="ti ti-user"></i></div>
+        <div class="resp-title">Responsável comercial</div>
+      </div>
+      <div class="resp-body">
+        <div class="resp-empty">
+          <div class="resp-empty-text">Ninguém definido para atender os leads dessa campanha</div>
+          <button class="resp-add-btn" onclick="startEditResp('${c.id}')"><i class="ti ti-user-plus"></i> Adicionar responsável</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  const wa=resp.phone?waLink(resp.phone):null;
+  return `<div class="resp-section" id="resp-box-${c.id}">
+    <div class="resp-head">
+      <div class="resp-icon"><i class="ti ti-user"></i></div>
+      <div class="resp-title">Responsável comercial</div>
+    </div>
+    <div class="resp-body">
+      <div class="resp-view">
+        <div class="resp-view-info">
+          <div class="resp-view-name"><i class="ti ti-user-check" style="color:var(--green)"></i> ${resp.name.replace(/</g,"&lt;")}</div>
+          ${resp.phone?`<div class="resp-view-phone"><i class="ti ti-phone"></i> ${resp.phone.replace(/</g,"&lt;")}</div>`:""}
+        </div>
+        <div class="resp-view-actions">
+          ${wa?`<a class="resp-btn-sm wa" href="${wa}" target="_blank"><i class="ti ti-brand-whatsapp"></i> WhatsApp</a>`:""}
+          <button class="resp-btn-sm" onclick="startEditResp('${c.id}')"><i class="ti ti-pencil"></i> Editar</button>
+          <button class="resp-btn-sm del" onclick="confirmDeleteResp('${c.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
 renderChips();

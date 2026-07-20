@@ -479,6 +479,14 @@ html[data-theme="light"] .date-input{color-scheme:light}
 .calc-body{padding:24px}
 .calc-section{margin-bottom:20px}
 .calc-section-title{font-size:11px;font-weight:900;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.calc-scope-badge{font-size:9.5px;font-weight:900;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:0.06em;margin-left:auto;border:1px solid}
+.calc-scope-badge.active{background:var(--tag-v-bg);color:var(--tag-v-fg);border-color:transparent}
+.calc-scope-badge.lifetime{background:var(--tag-p-bg);color:var(--tag-p-fg);border-color:transparent}
+.calc-period-tabs{display:flex;gap:4px;background:var(--surf2);border:1px solid var(--border);padding:4px;border-radius:12px;margin-bottom:12px;width:fit-content}
+.calc-period-tab{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;border:none;background:none;display:flex;align-items:center;gap:6px;transition:.2s;font-family:inherit;white-space:nowrap}
+.calc-period-tab:hover{color:var(--ink)}
+.calc-period-tab.on{background:var(--surf3);color:var(--green);box-shadow:0 2px 8px rgba(130,10,209,0.15)}
+.calc-period-tab i{font-size:14px}
 .calc-camp-select{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--ink);font-family:inherit;font-size:13px;outline:none;cursor:pointer;font-weight:600}
 .calc-camp-select:hover{border-color:var(--border2)}
 .calc-camp-select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(130,10,209,0.1)}
@@ -797,26 +805,31 @@ html[data-theme="light"] .date-input{color-scheme:light}
         </select>
       </div>
       <div class="calc-section" id="calc-panel-section" style="display:none">
-        <div class="calc-section-title"><i class="ti ti-chart-bar"></i> 2. Dados do painel (referência)</div>
+        <div class="calc-section-title"><i class="ti ti-chart-bar"></i> 2. Dados do painel (referência) <span class="calc-scope-badge" id="calc-scope-badge"></span></div>
         <div class="calc-panel-data" id="calc-panel-data"></div>
       </div>
       <div class="calc-section" id="calc-inputs-section" style="display:none">
         <div class="calc-section-title"><i class="ti ti-user-check"></i> 3. Realidade do vendedor (preencha)</div>
+        <div class="calc-period-tabs">
+          <button class="calc-period-tab on" data-period="daily" onclick="setCalcPeriod('daily',this)"><i class="ti ti-calendar-event"></i> Diário</button>
+          <button class="calc-period-tab" data-period="weekly" onclick="setCalcPeriod('weekly',this)"><i class="ti ti-calendar-week"></i> Semanal</button>
+          <button class="calc-period-tab" data-period="monthly" onclick="setCalcPeriod('monthly',this)"><i class="ti ti-calendar-month"></i> Mensal</button>
+        </div>
         <div class="calc-inputs">
           <div class="calc-input-wrap">
-            <div class="calc-input-lbl">Orçamento diário (R$) <span class="help" title="Quanto essa campanha gasta por dia">💡</span></div>
+            <div class="calc-input-lbl"><span id="calc-lbl-budget">Orçamento diário (R$)</span> <span class="help" title="Quanto essa campanha gasta no período">💡</span></div>
             <input type="number" class="calc-input" id="calc-budget" placeholder="30" step="1" min="0" oninput="calcResults()">
-            <div class="calc-hint">Já pré-preenchido baseado no gasto médio</div>
+            <div class="calc-hint" id="calc-hint-budget">Já pré-preenchido baseado no gasto médio</div>
           </div>
           <div class="calc-input-wrap">
-            <div class="calc-input-lbl">Leads chegando/dia <span class="help" title="Quantas pessoas efetivamente chamam no WhatsApp por dia (o que o vendedor recebe)">💡</span></div>
+            <div class="calc-input-lbl"><span id="calc-lbl-leads">Leads chegando/dia</span> <span class="help" title="Quantas pessoas efetivamente chamam no WhatsApp no período (o que o vendedor recebe)">💡</span></div>
             <input type="number" class="calc-input" id="calc-leads" placeholder="5" step="1" min="0" oninput="calcResults()">
-            <div class="calc-hint">Quantos leads o vendedor recebe/dia</div>
+            <div class="calc-hint" id="calc-hint-leads">Quantos leads o vendedor recebe</div>
           </div>
           <div class="calc-input-wrap">
-            <div class="calc-input-lbl">Leads qualificados/dia <span class="help" title="Leads com PERFIL: mora perto, INSS ativo, acidente recente, etc.">💡</span></div>
+            <div class="calc-input-lbl"><span id="calc-lbl-qualified">Leads qualificados/dia</span> <span class="help" title="Leads com PERFIL: mora perto, INSS ativo, acidente recente, etc.">💡</span></div>
             <input type="number" class="calc-input" id="calc-qualified" placeholder="1" step="0.5" min="0" oninput="calcResults()">
-            <div class="calc-hint">Quantos servem de verdade</div>
+            <div class="calc-hint" id="calc-hint-qualified">Quantos servem de verdade</div>
           </div>
         </div>
       </div>
@@ -825,12 +838,12 @@ html[data-theme="light"] .date-input{color-scheme:light}
           <div class="calc-result-item">
             <div class="calc-result-lbl">Custo bruto/lead</div>
             <div class="calc-result-val" id="calc-r-gross">R$ —</div>
-            <div class="calc-result-note">Orçamento ÷ leads/dia</div>
+            <div class="calc-result-note" id="calc-r-gross-note">Orçamento ÷ leads/dia</div>
           </div>
           <div class="calc-result-item">
             <div class="calc-result-lbl">Custo/lead QUALIFICADO</div>
             <div class="calc-result-val big" id="calc-r-qualified">R$ —</div>
-            <div class="calc-result-note">Orçamento ÷ qualificados/dia</div>
+            <div class="calc-result-note" id="calc-r-qualified-note">Orçamento ÷ qualificados/dia</div>
           </div>
           <div class="calc-result-item">
             <div class="calc-result-lbl">Taxa de qualificação</div>
@@ -1836,11 +1849,54 @@ function renderReport(){
 }
 
 // ============ CALCULADORA CPA REAL ============
+let calcPeriod="daily"; // daily | weekly | monthly
+const PERIOD_INFO={
+  daily:{label:"dia",days:1,budget:"Orçamento diário (R$)",leads:"Leads chegando/dia",qualified:"Leads qualificados/dia",budgetHint:"Já pré-preenchido baseado no gasto médio",leadsHint:"Quantos leads o vendedor recebe/dia",qualifiedHint:"Quantos servem de verdade/dia",noteGross:"Orçamento ÷ leads/dia",noteQual:"Orçamento ÷ qualificados/dia"},
+  weekly:{label:"semana",days:7,budget:"Orçamento semanal (R$)",leads:"Leads chegando/semana",qualified:"Leads qualificados/semana",budgetHint:"Total gasto na semana (5x segunda-a-sexta ou 7 dias)",leadsHint:"Leads que o vendedor recebeu na semana",qualifiedHint:"Quantos leads da semana são úteis",noteGross:"Orçamento ÷ leads da semana",noteQual:"Orçamento ÷ qualificados da semana"},
+  monthly:{label:"mês",days:30,budget:"Orçamento mensal (R$)",leads:"Leads chegando/mês",qualified:"Leads qualificados/mês",budgetHint:"Total gasto no mês",leadsHint:"Leads recebidos no mês inteiro",qualifiedHint:"Total de leads qualificados no mês",noteGross:"Orçamento ÷ leads do mês",noteQual:"Orçamento ÷ qualificados do mês"}
+};
+
 function getCalc(id){try{const r=localStorage.getItem("ccalc-"+id);return r?JSON.parse(r):null;}catch(e){return null;}}
 function saveCalc(id,data){try{localStorage.setItem("ccalc-"+id,JSON.stringify(data));return true;}catch(e){return false;}}
 
+function setCalcPeriod(p,el){
+  calcPeriod=p;
+  document.querySelectorAll(".calc-period-tab").forEach(t=>t.classList.remove("on"));
+  if(el)el.classList.add("on");
+  // Atualizar labels dos inputs
+  const info=PERIOD_INFO[p];
+  document.getElementById("calc-lbl-budget").textContent=info.budget;
+  document.getElementById("calc-lbl-leads").textContent=info.leads;
+  document.getElementById("calc-lbl-qualified").textContent=info.qualified;
+  document.getElementById("calc-hint-budget").textContent=info.budgetHint;
+  document.getElementById("calc-hint-leads").textContent=info.leadsHint;
+  document.getElementById("calc-hint-qualified").textContent=info.qualifiedHint;
+  document.getElementById("calc-r-gross-note").textContent=info.noteGross;
+  document.getElementById("calc-r-qualified-note").textContent=info.noteQual;
+  // Recalcular auto-preenchimento
+  const id=document.getElementById("calc-camp").value;
+  if(id){
+    const c=C.find(x=>x.id===id);
+    if(c){
+      const dailyBudget=c.status==="ACTIVE"?c.spent/30:(daysSince(c.created_iso)>0?c.spent/daysSince(c.created_iso):c.spent);
+      const dailyConv=c.status==="ACTIVE"?c.conv/30:(daysSince(c.created_iso)>0?c.conv/daysSince(c.created_iso):c.conv);
+      const saved=getCalc(id);
+      // Se tem valores salvos pro mesmo período, mantém; caso contrário, ajusta
+      if(saved&&saved.period===p){
+        document.getElementById("calc-budget").value=saved.budget;
+        document.getElementById("calc-leads").value=saved.leads;
+        document.getElementById("calc-qualified").value=saved.qualified;
+      } else {
+        document.getElementById("calc-budget").value=(dailyBudget*info.days).toFixed(2);
+        document.getElementById("calc-leads").value=dailyConv*info.days>0?(Math.round(dailyConv*info.days*10)/10):"";
+        document.getElementById("calc-qualified").value="";
+      }
+    }
+  }
+  calcResults();
+}
+
 function showCalc(){
-  // Popular dropdown com todas as campanhas ativas ordenadas por gasto
   const active=C.filter(c=>c.status==="ACTIVE").sort((a,b)=>b.spent-a.spent);
   const paused=C.filter(c=>c.status==="PAUSED").sort((a,b)=>b.spent-a.spent).slice(0,20);
   let opts='<option value="">— Escolha uma campanha —</option>';
@@ -1854,10 +1910,14 @@ function showCalc(){
   }
   document.getElementById("calc-camp").innerHTML=opts;
   document.getElementById("calc-overlay").classList.add("on");
-  // Reset painel
   document.getElementById("calc-panel-section").style.display="none";
   document.getElementById("calc-inputs-section").style.display="none";
   document.getElementById("calc-results").classList.remove("on");
+  // Resetar período pra "diário"
+  calcPeriod="daily";
+  document.querySelectorAll(".calc-period-tab").forEach(t=>t.classList.remove("on"));
+  const dailyTab=document.querySelector('.calc-period-tab[data-period="daily"]');
+  if(dailyTab)dailyTab.classList.add("on");
 }
 function hideCalc(){document.getElementById("calc-overlay").classList.remove("on")}
 
@@ -1871,31 +1931,41 @@ function onCalcCampChange(){
   }
   const c=C.find(x=>x.id===id);
   if(!c)return;
-  // Estimar orçamento diário: usar spent dos últimos 30 dias se ativa, ou spent/dias se pausada
-  let budgetGuess=0;
+  // Estimar orçamento diário
+  let dailyBudget=0;
   const days=daysSince(c.created_iso);
+  if(c.status==="ACTIVE"){dailyBudget=c.spent/30;} else {dailyBudget=days>0?c.spent/days:c.spent;}
+  const dailyConv=c.status==="ACTIVE"?c.conv/30:(days>0?c.conv/days:c.conv);
+  // BADGE de escopo (deixa claro se é 30d ou lifetime)
+  const scopeBadge=document.getElementById("calc-scope-badge");
   if(c.status==="ACTIVE"){
-    // Ativas: painel mostra últimos 30d, então spent/30 é média diária real
-    budgetGuess=c.spent/30;
+    scopeBadge.className="calc-scope-badge active";
+    scopeBadge.textContent="Últimos 30 dias";
   } else {
-    // Pausadas: spent é lifetime, dividir por dias desde criação
-    budgetGuess=days>0?c.spent/days:c.spent;
+    scopeBadge.className="calc-scope-badge lifetime";
+    scopeBadge.textContent=`Histórico completo · ${days} dias`;
   }
-  const convDaily=c.status==="ACTIVE"?c.conv/30:(days>0?c.conv/days:c.conv);
   // Preencher painel
   document.getElementById("calc-panel-data").innerHTML=`
     <div class="calc-panel-item"><div class="calc-panel-lbl">Gasto no período</div><div class="calc-panel-val">R$ ${c.spent.toFixed(0)}</div></div>
     <div class="calc-panel-item"><div class="calc-panel-lbl">CPA do painel</div><div class="calc-panel-val ${cpaC(c.cpa)}">${c.cpa?"R$ "+br(c.cpa):"—"}</div></div>
     <div class="calc-panel-item"><div class="calc-panel-lbl">Conversas totais</div><div class="calc-panel-val g">${brNum(c.conv)}</div></div>
-    <div class="calc-panel-item"><div class="calc-panel-lbl">Estimativa/dia</div><div class="calc-panel-val">R$ ${budgetGuess.toFixed(2).replace(".",",")}</div></div>
+    <div class="calc-panel-item"><div class="calc-panel-lbl">Média/dia estimada</div><div class="calc-panel-val">R$ ${dailyBudget.toFixed(2).replace(".",",")}</div></div>
   `;
   document.getElementById("calc-panel-section").style.display="";
   document.getElementById("calc-inputs-section").style.display="";
-  // Preencher inputs com valores salvos ou estimados
+  // Preencher inputs baseado no período atual
+  const info=PERIOD_INFO[calcPeriod];
   const saved=getCalc(id);
-  document.getElementById("calc-budget").value=saved?saved.budget:budgetGuess.toFixed(2);
-  document.getElementById("calc-leads").value=saved?saved.leads:(convDaily>0?Math.round(convDaily*10)/10:"");
-  document.getElementById("calc-qualified").value=saved?saved.qualified:"";
+  if(saved&&saved.period===calcPeriod){
+    document.getElementById("calc-budget").value=saved.budget;
+    document.getElementById("calc-leads").value=saved.leads;
+    document.getElementById("calc-qualified").value=saved.qualified;
+  } else {
+    document.getElementById("calc-budget").value=(dailyBudget*info.days).toFixed(2);
+    document.getElementById("calc-leads").value=dailyConv*info.days>0?(Math.round(dailyConv*info.days*10)/10):"";
+    document.getElementById("calc-qualified").value=saved?saved.qualified:"";
+  }
   calcResults();
 }
 
@@ -1912,16 +1982,17 @@ function calcResults(){
   const grossCost=budget/leads;
   const qualifiedCost=qualified>0?budget/qualified:0;
   const rate=leads>0?(qualified/leads)*100:0;
+  const info=PERIOD_INFO[calcPeriod];
   document.getElementById("calc-r-gross").textContent="R$ "+grossCost.toFixed(2).replace(".",",");
   document.getElementById("calc-r-qualified").textContent=qualified>0?"R$ "+qualifiedCost.toFixed(2).replace(".",","):"— defina qualificados";
   document.getElementById("calc-r-rate").textContent=qualified>0?rate.toFixed(0)+"%":"—";
-  // Diagnóstico
   const c=C.find(x=>x.id===id);
   const isVaga=c&&c.segment==="vaga";
   const targetCpa=isVaga?9:15;
-  let diagStatus,diagStatusClass,diagText;
+  let diagText;
+  const periodTxt=info.label==="dia"?"por dia":`por ${info.label}`;
   if(qualified<=0){
-    diagText=`<span class="diag-status warn">DEFINIR</span> Informe quantos leads/dia são realmente qualificados pra ver o custo real por lead útil.`;
+    diagText=`<span class="diag-status warn">DEFINIR</span> Informe quantos leads são realmente qualificados ${periodTxt} pra ver o custo real por lead útil.`;
   } else if(rate>=50){
     diagText=`<span class="diag-status good">EXCELENTE</span> Taxa de qualificação de <b>${rate.toFixed(0)}%</b> é ótima. Custo por lead útil de <b>R$ ${qualifiedCost.toFixed(2).replace(".",",")}</b> ${qualifiedCost<=targetCpa?"está dentro da meta":"pode melhorar"}. ${qualifiedCost<=targetCpa?"<b>Manter e escalar</b> — aumentar orçamento gradualmente (+20%/semana).":"Refinar segmentação ou criativo pode reduzir mais."}`;
   } else if(rate>=25){
@@ -1931,9 +2002,8 @@ function calcResults(){
   }
   document.getElementById("calc-diagnosis").innerHTML=diagText;
   document.getElementById("calc-results").classList.add("on");
-  // Salvar automaticamente
-  saveCalc(id,{budget,leads,qualified,ts:new Date().toISOString()});
-  document.getElementById("calc-save-status").textContent="Salvo em "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+" (persiste por campanha)";
+  saveCalc(id,{budget,leads,qualified,period:calcPeriod,ts:new Date().toISOString()});
+  document.getElementById("calc-save-status").textContent=`Salvo em ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} · Análise ${info.label} · Persiste por campanha e período`;
 }
 
 // ============ RESPONSÁVEL COMERCIAL ============

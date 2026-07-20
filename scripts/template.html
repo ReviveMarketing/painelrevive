@@ -728,6 +728,9 @@ html[data-theme="light"] .date-input{color-scheme:light}
   <div class="stitle"><i class="ti ti-tag"></i> Filtrar por tipo de campanha <button class="filter-btn" onclick="togglePanel('tipo',this)">ocultar</button></div>
   <div class="chips" id="tipos-panel"></div>
 
+  <div class="stitle"><i class="ti ti-user-check"></i> Filtrar por consultor <button class="filter-btn" onclick="togglePanel('consultor',this)">ocultar</button></div>
+  <div class="chips" id="consultor-panel"></div>
+
   <div class="filters-active" id="filters-active"></div>
 
   <div class="bar">
@@ -897,8 +900,8 @@ try{
   }
 }catch(e){}
 
-let statusFilter="all",pracaFilters=new Set(),tipoFilters=new Set(),openId=null;
-let panels={praca:true,tipo:true};
+let statusFilter="all",pracaFilters=new Set(),tipoFilters=new Set(),consultorFilters=new Set(),openId=null;
+let panels={praca:true,tipo:true,consultor:true};
 let chartMetric="spent",selectedMonth=null,dateFrom=null,dateTo=null;
 
 // ============ BADGES ============
@@ -1144,7 +1147,11 @@ function renderTrend(){
 // ============ CHART ============
 function togglePanel(which,btn){
   panels[which]=!panels[which];
-  const panel=document.getElementById((which==="praca"?"pracas":"tipos")+"-panel");
+  let panelId;
+  if(which==="praca")panelId="pracas-panel";
+  else if(which==="tipo")panelId="tipos-panel";
+  else if(which==="consultor")panelId="consultor-panel";
+  const panel=document.getElementById(panelId);
   panel.style.display=panels[which]?"":"none";
   btn.textContent=panels[which]?"ocultar":"mostrar";
 }
@@ -1215,6 +1222,60 @@ function renderChips(){
     const isOn=tipoFilters.has(name);
     return`<div class="chip ${isOn?"on":""}" onclick="toggleTipo('${name.replace(/'/g,"\\\\'")}')"><div class="chip-name">${name} <span class="cnt ${s.active>0?"active":""}">${s.n}${s.active?" ("+s.active+"a)":""}</span></div><div class="chip-stats"><span>R$ ${s.spent.toFixed(0)}</span><span>${brNum(s.conv)} conv</span><span class="chip-cpa">R$ ${s.cpa.toFixed(2).replace(".",",")}</span></div></div>`;
   }).join("");
+  renderConsultorChips();
+}
+
+// ============ CONSULTORES (do localStorage) ============
+function getAllResps(){
+  const result={};
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(key&&key.startsWith("cresp-")){
+        const id=key.substring(6);
+        try{result[id]=JSON.parse(localStorage.getItem(key));}catch(e){}
+      }
+    }
+  }catch(e){}
+  return result;
+}
+
+function renderConsultorChips(){
+  const resps=getAllResps();
+  const byName={};
+  Object.entries(resps).forEach(([campId,r])=>{
+    if(!r||!r.name)return;
+    if(!byName[r.name])byName[r.name]={phone:r.phone||"",camps:[],spent:0,conv:0,active:0};
+    byName[r.name].camps.push(campId);
+    const c=C.find(x=>x.id===campId);
+    if(c){
+      byName[r.name].spent+=c.spent;
+      byName[r.name].conv+=c.conv;
+      if(c.status==="ACTIVE")byName[r.name].active++;
+    }
+  });
+  const el=document.getElementById("consultor-panel");
+  if(!el)return;
+  if(Object.keys(byName).length===0){
+    el.innerHTML=`<div style="grid-column:1/-1;padding:16px 14px;color:var(--muted);font-size:12px;text-align:center;background:var(--surf);border:1px dashed var(--border);border-radius:12px;font-weight:600;line-height:1.5">
+      <i class="ti ti-user-plus" style="font-size:22px;color:var(--dim);display:block;margin-bottom:6px"></i>
+      Nenhum consultor cadastrado ainda.<br>
+      <span style="font-size:11px;color:var(--dim);font-weight:500">Adicione responsáveis clicando em uma campanha e definindo o consultor comercial.</span>
+    </div>`;
+    return;
+  }
+  const sorted=Object.entries(byName).sort((a,b)=>b[1].active-a[1].active||b[1].camps.length-a[1].camps.length);
+  el.innerHTML=sorted.map(([name,data])=>{
+    const isOn=consultorFilters.has(name);
+    return`<div class="chip ${isOn?"on":""}" onclick="toggleConsultor('${name.replace(/'/g,"\\\\'")}')"><div class="chip-name">${name} <span class="cnt ${data.active>0?"active":""}">${data.camps.length}${data.active?" ("+data.active+"a)":""}</span></div><div class="chip-stats"><span>R$ ${data.spent.toFixed(0)}</span><span>${brNum(data.conv)} conv</span><span class="chip-cpa" style="font-size:10px">${data.phone||"—"}</span></div></div>`;
+  }).join("");
+}
+
+function toggleConsultor(n){
+  consultorFilters.has(n)?consultorFilters.delete(n):consultorFilters.add(n);
+  renderConsultorChips();
+  renderFilters();
+  render();
 }
 function togglePraca(n){pracaFilters.has(n)?pracaFilters.delete(n):pracaFilters.add(n);renderChips();renderFilters();render()}
 function toggleTipo(n){tipoFilters.has(n)?tipoFilters.delete(n):tipoFilters.add(n);renderChips();renderFilters();render()}
@@ -1222,10 +1283,11 @@ function renderFilters(){
   const el=document.getElementById("filters-active");const parts=[];
   pracaFilters.forEach(p=>parts.push(`<span class="f-tag" onclick="togglePraca('${p.replace(/'/g,"\\\\'")}')"><i class="ti ti-map-pin"></i> ${p} <i class="ti ti-x"></i></span>`));
   tipoFilters.forEach(t=>parts.push(`<span class="f-tag" onclick="toggleTipo('${t.replace(/'/g,"\\\\'")}')"><i class="ti ti-tag"></i> ${t} <i class="ti ti-x"></i></span>`));
+  consultorFilters.forEach(n=>parts.push(`<span class="f-tag" onclick="toggleConsultor('${n.replace(/'/g,"\\\\'")}')"><i class="ti ti-user-check"></i> ${n} <i class="ti ti-x"></i></span>`));
   if(parts.length>0)parts.push(`<button class="f-clear" onclick="clearAllFilters()">Limpar todos</button>`);
   el.innerHTML=parts.join("");
 }
-function clearAllFilters(){pracaFilters.clear();tipoFilters.clear();renderChips();renderFilters();render()}
+function clearAllFilters(){pracaFilters.clear();tipoFilters.clear();consultorFilters.clear();renderChips();renderFilters();render()}
 function setSt(s,el){statusFilter=s;document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));el.classList.add("on");render()}
 
 function parseDate(s){
@@ -1541,6 +1603,10 @@ function render(){
     if(statusFilter==="vaga"&&c.segment!=="vaga")return false;
     if(pracaFilters.size>0&&!pracaFilters.has(c.praca))return false;
     if(tipoFilters.size>0&&!tipoFilters.has(c.tipo))return false;
+    if(consultorFilters.size>0){
+      const r=getResp(c.id);
+      if(!r||!consultorFilters.has(r.name))return false;
+    }
     if(q&&!c.name.toLowerCase().includes(q)&&!c.praca.toLowerCase().includes(q)&&!c.tipo.toLowerCase().includes(q))return false;
     if(selectedMonth&&(!c.created_iso||!c.created_iso.startsWith(selectedMonth)))return false;
     if(dateFrom&&(!c.created_iso||c.created_iso<dateFrom))return false;
@@ -2036,10 +2102,11 @@ function doSaveResp(id){
   const phone=document.getElementById("resp-phone-"+id).value.trim();
   if(!name){alert("Digite o nome do responsável");return}
   saveResp(id,{name,phone,ts:new Date().toISOString()});
+  renderConsultorChips();
   render();
 }
 function confirmDeleteResp(id){
-  if(confirm("Remover o responsável dessa campanha?")){deleteResp(id);render();}
+  if(confirm("Remover o responsável dessa campanha?")){deleteResp(id);renderConsultorChips();render();}
 }
 function waLink(phone){
   const clean=phone.replace(/\D/g,"");

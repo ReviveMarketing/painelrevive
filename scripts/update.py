@@ -236,8 +236,59 @@ def fetch_campaigns():
             print(f"  {i+1}/{len(active_ids)}")
     return campaigns, recent_insights
 
-def process_campaigns(campaigns, recent_insights):
+def fetch_monthly_insights(campaigns):
+    """
+    Puxa metricas mensais (breakdown por mes) de cada campanha que ja teve gasto.
+    Retorna dict: {campaign_id: {"YYYY-MM": {"spent": x, "conv": y}, ...}}
+    
+    IMPORTANTE: Essa funcao adiciona ~1 chamada extra por campanha com gasto.
+    Se falhar em uma campanha, continua as outras (nao quebra o fluxo).
+    """
+    monthly_data = {}
+    # Filtra so campanhas que ja tem historico de gasto
+    campaigns_with_history = []
+    for c in campaigns:
+        insights = c.get('insights', {}).get('data', [])
+        if insights and float(insights[0].get('spend', 0) or 0) > 0:
+            campaigns_with_history.append(c['id'])
+    
+    total = len(campaigns_with_history)
+    print(f"Buscando historico mensal de {total} campanhas com gasto...")
+    
+    for i, cid in enumerate(campaigns_with_history):
+        try:
+            result = meta_get(f"{cid}/insights", {
+                'fields': 'spend,actions',
+                'date_preset': 'maximum',
+                'time_increment': 'monthly',
+                'limit': 100,
+            })
+            data = result.get('data', [])
+            monthly = {}
+            for entry in data:
+                date_start = entry.get('date_start', '')
+                if not date_start or len(date_start) < 7:
+                    continue
+                mkey = date_start[:7]  # "YYYY-MM"
+                spend = float(entry.get('spend', 0) or 0)
+                actions = entry.get('actions', [])
+                conv = get_conversations_started(actions)
+                monthly[mkey] = {
+                    'spent': round(spend, 2),
+                    'conv': conv
+                }
+            if monthly:
+                monthly_data[cid] = monthly
+        except Exception as e:
+            print(f"  falha ao puxar mensal de {cid}: {e}")
+        if (i+1) % 20 == 0:
+            print(f"  {i+1}/{total}")
+    print(f"Historico mensal obtido para {len(monthly_data)} campanhas")
+    return monthly_data
+
+def process_campaigns(campaigns, recent_insights, monthly_data=None):
     processed = []
+    monthly_data = monthly_data or {}
     for c in campaigns:
         is_active = c.get('effective_status') == 'ACTIVE'
         insights = None
@@ -258,7 +309,7 @@ def process_campaigns(campaigns, recent_insights):
         cpa = get_cost_per_conversation(cost_per_action)
         name = c.get('name', '')
         tipo = extract_tipo(name)
-        processed.append({
+        item = {
             'id': c['id'],
             'name': name,
             'status': 'ACTIVE' if is_active else 'PAUSED',
@@ -278,7 +329,11 @@ def process_campaigns(campaigns, recent_insights):
             'tipo': tipo,
             'mtype': 'VIDEO' if any(k in name.lower() for k in ['vídeo','video']) else 'IMAGE',
             'segment': 'vaga' if tipo == 'Vaga' else 'captacao',
-        })
+        }
+        # Adiciona breakdown mensal se disponivel
+        if c['id'] in monthly_data:
+            item['monthly'] = monthly_data[c['id']]
+        processed.append(item)
     processed.sort(key=lambda x: -x['spent'])
     return processed
 
@@ -396,13 +451,18 @@ def main():
     
     # 2. Puxa dados novos
     campaigns, recent_insights = fetch_campaigns()
-    processed = process_campaigns(campaigns, recent_insights)
+    
+    # 2b. Puxa breakdown mensal (necessario pro filtro por periodo funcionar bem)
+    monthly_data = fetch_monthly_insights(campaigns)
+    
+    processed = process_campaigns(campaigns, recent_insights, monthly_data)
     stats = compute_stats(processed)
     
     print(f"\nEstatisticas:")
     print(f"  Total: {stats['total']} campanhas ({stats['active']} ativas, {stats['paused']} pausadas)")
     print(f"  Captacao: R$ {stats['cap_spent']:.0f} / {stats['cap_conv']} conv")
     print(f"  Vagas: R$ {stats['vag_spent']:.0f} / {stats['vag_conv']} conv")
+    print(f"  Campanhas com breakdown mensal: {sum(1 for c in processed if 'monthly' in c)}")
     
     # 3. Gera novo HTML:
     #    - Tag 'prev-snapshot-data' = snapshot ANTERIOR (JS compara com dados atuais)

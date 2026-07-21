@@ -71,7 +71,23 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);min-
 .alert-item b{font-weight:700}
 @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 
-/* HERO KPIs (grandes, estilo app) */
+/* ============ KPI DATE FILTER BAR ============ */
+.kpi-filter-bar{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:var(--shadow);transition:.2s}
+.kpi-filter-bar.active{border-color:var(--green);box-shadow:0 0 0 2px rgba(130,10,209,0.15)}
+.kpi-filter-label{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.kpi-filter-label i{color:var(--green);font-size:14px}
+.kpi-filter-quick{display:flex;gap:5px;flex-wrap:wrap}
+.kpi-quick-btn{background:var(--surf2);border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;font-family:inherit;transition:.2s;display:flex;align-items:center;gap:5px}
+.kpi-quick-btn:hover{background:var(--surf3);color:var(--ink);border-color:var(--border2)}
+.kpi-quick-btn.on{background:var(--grad-purple);color:#fff;border-color:transparent;box-shadow:0 4px 10px rgba(130,10,209,0.3)}
+.kpi-custom-dates{display:none;align-items:center;gap:6px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:4px 8px}
+.kpi-custom-dates.on{display:flex}
+.kpi-custom-input{background:transparent;border:none;color:var(--ink);font-family:inherit;font-size:11.5px;padding:3px 4px;outline:none;cursor:pointer;color-scheme:dark;font-weight:600;max-width:120px}
+html[data-theme="light"] .kpi-custom-input{color-scheme:light}
+.kpi-active-filter{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--green);font-weight:700;background:var(--surf3);padding:6px 12px;border-radius:20px;border:1px solid var(--green)}
+.kpi-active-filter i{color:var(--green);font-size:13px}
+.kpi-active-filter b{font-weight:900}
+.kpi-active-filter.hidden{display:none}
 .hero-kpis{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}
 .kpi-hero{background:var(--surf);border:1px solid var(--border);border-radius:20px;padding:22px;transition:all .2s;position:relative;overflow:hidden;box-shadow:var(--shadow)}
 .kpi-hero.primary{background:var(--grad-green);border:none;color:#fff}
@@ -669,37 +685,57 @@ html[data-theme="light"] .calc-date-input{color-scheme:light}
     <div class="alert-list" id="alert-list"></div>
   </div>
 
+  <!-- KPI DATE FILTER BAR -->
+  <div class="kpi-filter-bar" id="kpi-filter-bar">
+    <div class="kpi-filter-label"><i class="ti ti-calendar-filled"></i> Período dos indicadores</div>
+    <div class="kpi-filter-quick">
+      <button class="kpi-quick-btn on" data-preset="all" onclick="setKpiFilter('all',this)"><i class="ti ti-infinity"></i> Histórico completo</button>
+      <button class="kpi-quick-btn" data-preset="current" onclick="setKpiFilter('current',this)"><i class="ti ti-calendar-month"></i> Este mês</button>
+      <button class="kpi-quick-btn" data-preset="lastmonth" onclick="setKpiFilter('lastmonth',this)"><i class="ti ti-calendar-minus"></i> Mês passado</button>
+      <button class="kpi-quick-btn" data-preset="30d" onclick="setKpiFilter('30d',this)">30 dias</button>
+      <button class="kpi-quick-btn" data-preset="90d" onclick="setKpiFilter('90d',this)">90 dias</button>
+      <button class="kpi-quick-btn" data-preset="year" onclick="setKpiFilter('year',this)">Este ano</button>
+      <button class="kpi-quick-btn" data-preset="custom" onclick="setKpiFilter('custom',this)"><i class="ti ti-calendar-search"></i> Personalizado</button>
+    </div>
+    <div class="kpi-custom-dates" id="kpi-custom-dates">
+      <input type="date" class="kpi-custom-input" id="kpi-date-from" onchange="applyKpiCustomDates()">
+      <span style="color:var(--muted);font-size:11px;font-weight:700">até</span>
+      <input type="date" class="kpi-custom-input" id="kpi-date-to" onchange="applyKpiCustomDates()">
+    </div>
+    <div class="kpi-active-filter hidden" id="kpi-active-filter"></div>
+  </div>
+
   <!-- HERO KPIs -->
   <div class="hero-kpis">
     <div class="kpi-hero primary">
       <div class="kpi-lbl">Investido histórico</div>
-      <div class="kpi-val">R$ {{SPENT}}</div>
-      <div class="kpi-note">{{TOTAL}} campanhas · {{ACTIVE}} ativas hoje</div>
+      <div class="kpi-val" id="kpi-invested">R$ {{SPENT}}</div>
+      <div class="kpi-note" id="kpi-invested-note">{{TOTAL}} campanhas · {{ACTIVE}} ativas hoje</div>
       <div id="kpi-hero-trend"></div>
     </div>
     <div class="kpi-hero">
       <div class="kpi-lbl">Conversas totais</div>
       <div class="kpi-val" id="total-conv-val">{{TOTAL_CONV}}</div>
-      <div class="kpi-note">todas as campanhas</div>
+      <div class="kpi-note" id="kpi-conv-note">todas as campanhas</div>
       <div id="conv-trend"></div>
     </div>
     <div class="kpi-hero">
       <div class="kpi-lbl">CPA captação</div>
-      <div class="kpi-val" style="color:var(--green)">R$ {{CAP_CPA}}</div>
-      <div class="kpi-note">{{CAP_CONV}} conversas</div>
+      <div class="kpi-val" id="kpi-cap-cpa" style="color:var(--green)">R$ {{CAP_CPA}}</div>
+      <div class="kpi-note" id="kpi-cap-conv-note">{{CAP_CONV}} conversas</div>
     </div>
     <div class="kpi-hero">
       <div class="kpi-lbl">CPA vagas</div>
-      <div class="kpi-val" style="color:var(--blue)">R$ {{VAG_CPA}}</div>
-      <div class="kpi-note">{{VAG_CONV}} conversas</div>
+      <div class="kpi-val" id="kpi-vag-cpa" style="color:var(--blue)">R$ {{VAG_CPA}}</div>
+      <div class="kpi-note" id="kpi-vag-conv-note">{{VAG_CONV}} conversas</div>
     </div>
   </div>
 
   <!-- SECONDARY KPIs -->
   <div class="kpis">
-    <div class="kpi"><div class="kpi-lbl">Campanhas ativas</div><div class="kpi-val g">{{ACTIVE}}</div><div class="kpi-note">de {{TOTAL}} totais</div></div>
-    <div class="kpi"><div class="kpi-lbl">Investido captação</div><div class="kpi-val p">R$ {{CAP_SPENT}}</div><div class="kpi-note">{{CAP_N}} campanhas</div></div>
-    <div class="kpi"><div class="kpi-lbl">Investido vagas</div><div class="kpi-val b">R$ {{VAG_SPENT}}</div><div class="kpi-note">{{VAGAS_N}} campanhas</div></div>
+    <div class="kpi"><div class="kpi-lbl">Campanhas ativas</div><div class="kpi-val g" id="kpi-active-val">{{ACTIVE}}</div><div class="kpi-note" id="kpi-active-note">de {{TOTAL}} totais</div></div>
+    <div class="kpi"><div class="kpi-lbl">Investido captação</div><div class="kpi-val p" id="kpi-cap-spent">R$ {{CAP_SPENT}}</div><div class="kpi-note" id="kpi-cap-n">{{CAP_N}} campanhas</div></div>
+    <div class="kpi"><div class="kpi-lbl">Investido vagas</div><div class="kpi-val b" id="kpi-vag-spent">R$ {{VAG_SPENT}}</div><div class="kpi-note" id="kpi-vag-n">{{VAGAS_N}} campanhas</div></div>
     <div class="kpi"><div class="kpi-lbl">Praças ativas</div><div class="kpi-val g" id="pracas-active">-</div><div class="kpi-note">com campanhas rodando</div></div>
   </div>
 
@@ -970,6 +1006,241 @@ try{
 let statusFilter="all",pracaFilters=new Set(),tipoFilters=new Set(),consultorFilters=new Set(),openId=null;
 let panels={praca:true,tipo:true,consultor:true};
 let chartMetric="spent",selectedMonth=null,dateFrom=null,dateTo=null;
+let kpiDateFilter=null; // {from, to} ou null
+
+// ============ HELPERS PARA DADOS MENSAIS ============
+function getMonthsInRange(fromIso,toIso){
+  // Retorna array de "YYYY-MM" dos meses que interceptam o range
+  const months=[];
+  if(!fromIso||!toIso)return months;
+  const from=new Date(fromIso);
+  const to=new Date(toIso);
+  let cur=new Date(from.getFullYear(),from.getMonth(),1);
+  const end=new Date(to.getFullYear(),to.getMonth(),1);
+  while(cur<=end){
+    months.push(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,"0")}`);
+    cur.setMonth(cur.getMonth()+1);
+  }
+  return months;
+}
+
+function isFullMonthRange(fromIso,toIso){
+  // Retorna true se o range cobre meses inteiros (dia 1 ao ultimo dia do mes)
+  if(!fromIso||!toIso)return false;
+  const from=new Date(fromIso);
+  const to=new Date(toIso);
+  if(from.getDate()!==1)return false;
+  // Ultimo dia do mes de "to"
+  const lastDay=new Date(to.getFullYear(),to.getMonth()+1,0).getDate();
+  return to.getDate()===lastDay;
+}
+
+function proratedFactor(monthKey,fromIso,toIso){
+  // Retorna fator (0-1) de quanto do mes esta dentro do range
+  if(!fromIso||!toIso)return 1;
+  const [y,m]=monthKey.split("-").map(Number);
+  const monthStart=new Date(y,m-1,1);
+  const monthEnd=new Date(y,m,0);
+  const rangeStart=new Date(fromIso);
+  const rangeEnd=new Date(toIso);
+  const effectiveStart=monthStart>rangeStart?monthStart:rangeStart;
+  const effectiveEnd=monthEnd<rangeEnd?monthEnd:rangeEnd;
+  if(effectiveEnd<effectiveStart)return 0;
+  const daysInRange=Math.round((effectiveEnd-effectiveStart)/(1000*60*60*24))+1;
+  const daysInMonth=monthEnd.getDate();
+  return Math.max(0,Math.min(1,daysInRange/daysInMonth));
+}
+
+function aggregateFromMonthly(campaign,fromIso,toIso){
+  // Agrega spent/conv de uma campanha dentro do range usando dados mensais
+  if(!campaign.monthly)return null;
+  const months=getMonthsInRange(fromIso,toIso);
+  const isFullMonths=isFullMonthRange(fromIso,toIso);
+  let spent=0,conv=0,hasData=false;
+  months.forEach(mkey=>{
+    const m=campaign.monthly[mkey];
+    if(m){
+      hasData=true;
+      const factor=isFullMonths?1:proratedFactor(mkey,fromIso,toIso);
+      spent+=(m.spent||0)*factor;
+      conv+=Math.round((m.conv||0)*factor);
+    }
+  });
+  return hasData?{spent,conv}:null;
+}
+
+// ============ KPI DATE FILTER ============
+function setKpiFilter(preset,el){
+  document.querySelectorAll(".kpi-quick-btn").forEach(b=>b.classList.remove("on"));
+  if(el)el.classList.add("on");
+  const customBox=document.getElementById("kpi-custom-dates");
+  customBox.classList.remove("on");
+  customBox.style.display="none";
+  const now=new Date();
+  const iso=d=>d.toISOString().slice(0,10);
+  if(preset==="all"){
+    kpiDateFilter=null;
+  } else if(preset==="current"){
+    const from=new Date(now.getFullYear(),now.getMonth(),1);
+    kpiDateFilter={from:iso(from),to:iso(now)};
+  } else if(preset==="lastmonth"){
+    const from=new Date(now.getFullYear(),now.getMonth()-1,1);
+    const to=new Date(now.getFullYear(),now.getMonth(),0);
+    kpiDateFilter={from:iso(from),to:iso(to)};
+  } else if(preset==="30d"){
+    const from=new Date(now.getTime()-30*24*60*60*1000);
+    kpiDateFilter={from:iso(from),to:iso(now)};
+  } else if(preset==="90d"){
+    const from=new Date(now.getTime()-90*24*60*60*1000);
+    kpiDateFilter={from:iso(from),to:iso(now)};
+  } else if(preset==="year"){
+    const from=new Date(now.getFullYear(),0,1);
+    kpiDateFilter={from:iso(from),to:iso(now)};
+  } else if(preset==="custom"){
+    customBox.classList.add("on");
+    customBox.style.display="flex";
+    // Pré-preenche com últimos 30 dias se vazio
+    const fromInput=document.getElementById("kpi-date-from");
+    const toInput=document.getElementById("kpi-date-to");
+    if(!fromInput.value){
+      const from=new Date(now.getTime()-30*24*60*60*1000);
+      fromInput.value=iso(from);
+      toInput.value=iso(now);
+    }
+    applyKpiCustomDates();
+    return;
+  }
+  updateKpiFilterUI();
+  updateKpis();
+}
+
+function applyKpiCustomDates(){
+  const from=document.getElementById("kpi-date-from").value;
+  const to=document.getElementById("kpi-date-to").value;
+  if(from&&to){
+    kpiDateFilter={from,to};
+    updateKpiFilterUI();
+    updateKpis();
+  }
+}
+
+function updateKpiFilterUI(){
+  const el=document.getElementById("kpi-active-filter");
+  const bar=document.getElementById("kpi-filter-bar");
+  if(!kpiDateFilter){
+    el.classList.add("hidden");
+    bar.classList.remove("active");
+    return;
+  }
+  bar.classList.add("active");
+  el.classList.remove("hidden");
+  const d1=kpiDateFilter.from.split("-").reverse().join("/");
+  const d2=kpiDateFilter.to.split("-").reverse().join("/");
+  const d1Date=new Date(kpiDateFilter.from);
+  const d2Date=new Date(kpiDateFilter.to);
+  const days=Math.max(1,Math.round((d2Date-d1Date)/(1000*60*60*24))+1);
+  // Verificar quantas campanhas tem dados mensais
+  const withMonthly=C.filter(c=>c.monthly).length;
+  const withoutMonthly=C.length-withMonthly;
+  let extraNote="";
+  if(withoutMonthly>0){
+    extraNote=` <span style="opacity:0.7;font-size:10px" title="${withoutMonthly} campanhas sem breakdown mensal (novas ou sem historico)">· ${withoutMonthly}/${C.length} sem hist. mensal</span>`;
+  }
+  el.innerHTML=`<i class="ti ti-filter-check"></i> Filtrando: <b>${d1} a ${d2}</b> (${days}d)${extraNote}`;
+}
+
+function getFilteredCampaignsForKpi(){
+  if(!kpiDateFilter)return C;
+  return C.filter(c=>{
+    if(!c.created_iso)return false;
+    if(kpiDateFilter.from&&c.created_iso<kpiDateFilter.from)return false;
+    if(kpiDateFilter.to&&c.created_iso>kpiDateFilter.to)return false;
+    return true;
+  });
+}
+
+function updateKpis(){
+  const isFiltered=!!kpiDateFilter;
+  let spent=0,conv=0,capSpent=0,capConv=0,vagSpent=0,vagConv=0;
+  let campaigns=[];
+  let capCount=0,vagCount=0;
+  let campaignsWithData=[]; // campanhas que tem dado no periodo
+  const activePracas=new Set();
+  let activeCount=0;
+  
+  if(isFiltered){
+    // MODO FILTRADO: agrega dados MENSAIS reais de cada campanha
+    C.forEach(c=>{
+      const agg=aggregateFromMonthly(c,kpiDateFilter.from,kpiDateFilter.to);
+      if(agg){
+        spent+=agg.spent;
+        conv+=agg.conv;
+        campaignsWithData.push(c);
+        if(c.segment==="captacao"){
+          capSpent+=agg.spent;
+          capConv+=agg.conv;
+          capCount++;
+        } else if(c.segment==="vaga"){
+          vagSpent+=agg.spent;
+          vagConv+=agg.conv;
+          vagCount++;
+        }
+        if(c.status==="ACTIVE"){
+          activeCount++;
+          activePracas.add(c.praca);
+        }
+      }
+    });
+    campaigns=campaignsWithData;
+  } else {
+    // MODO NORMAL: usa totais lifetime (comportamento original)
+    campaigns=C;
+    spent=C.reduce((s,c)=>s+c.spent,0);
+    conv=C.reduce((s,c)=>s+c.conv,0);
+    const cap=C.filter(c=>c.segment==="captacao");
+    const vag=C.filter(c=>c.segment==="vaga");
+    capSpent=cap.reduce((s,c)=>s+c.spent,0);
+    capConv=cap.reduce((s,c)=>s+c.conv,0);
+    vagSpent=vag.reduce((s,c)=>s+c.spent,0);
+    vagConv=vag.reduce((s,c)=>s+c.conv,0);
+    capCount=cap.length;
+    vagCount=vag.length;
+    activeCount=C.filter(c=>c.status==="ACTIVE").length;
+    C.filter(c=>c.status==="ACTIVE").forEach(c=>activePracas.add(c.praca));
+  }
+  
+  const total=campaigns.length;
+  const filterSuffix=isFiltered?" no período":" hoje";
+  const setText=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  
+  // Hero KPIs
+  setText("kpi-invested","R$ "+Math.round(spent).toLocaleString("pt-BR"));
+  setText("kpi-invested-note",`${total} campanhas · ${activeCount} ativas${filterSuffix}`);
+  setText("total-conv-val",conv.toLocaleString("pt-BR"));
+  setText("kpi-conv-note",isFiltered?"no período selecionado":"todas as campanhas");
+  setText("kpi-cap-cpa","R$ "+(capConv>0?capSpent/capConv:0).toFixed(2).replace(".",","));
+  setText("kpi-cap-conv-note",capConv.toLocaleString("pt-BR")+" conversas");
+  setText("kpi-vag-cpa","R$ "+(vagConv>0?vagSpent/vagConv:0).toFixed(2).replace(".",","));
+  setText("kpi-vag-conv-note",vagConv.toLocaleString("pt-BR")+" conversas");
+  // Secondary KPIs
+  setText("kpi-active-val",activeCount);
+  setText("kpi-active-note",isFiltered?`de ${total} no período`:`de ${total} totais`);
+  setText("kpi-cap-spent","R$ "+Math.round(capSpent).toLocaleString("pt-BR"));
+  setText("kpi-cap-n",capCount+" campanhas");
+  setText("kpi-vag-spent","R$ "+Math.round(vagSpent).toLocaleString("pt-BR"));
+  setText("kpi-vag-n",vagCount+" campanhas");
+  setText("pracas-active",activePracas.size);
+  // Esconde trend quando filtro ativo (não faz sentido comparar filtrado com anterior sem filtro)
+  const heroTrend=document.getElementById("kpi-hero-trend");
+  const convTrend=document.getElementById("conv-trend");
+  if(isFiltered){
+    if(heroTrend)heroTrend.style.display="none";
+    if(convTrend)convTrend.style.display="none";
+  } else {
+    if(heroTrend)heroTrend.style.display="";
+    if(convTrend)convTrend.style.display="";
+  }
+}
 
 // ============ BADGES ============
 function getBadges(c){
@@ -2470,6 +2741,7 @@ renderAlerts();
 renderInsights();
 renderRankings();
 renderTrend();
+updateKpis();
 render();
 </script>
 </body>

@@ -88,6 +88,15 @@ html[data-theme="light"] .kpi-custom-input{color-scheme:light}
 .kpi-active-filter i{color:var(--green);font-size:13px}
 .kpi-active-filter b{font-weight:900}
 .kpi-active-filter.hidden{display:none}
+
+/* ============ FILTER BADGES nos cards e detalhes ============ */
+.filter-badge-inline{font-size:9px;font-weight:900;padding:2px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:0.04em;background:linear-gradient(135deg,#3b82f6,#5b3fd8);color:#fff;margin-left:5px;vertical-align:middle;display:inline-block}
+.dmv-filtered{position:relative}
+.dmv-filtered::after{content:"filtrado";position:absolute;top:-2px;right:-6px;font-size:8px;font-weight:900;padding:2px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:0.04em;background:linear-gradient(135deg,#3b82f6,#5b3fd8);color:#fff}
+.dm-filtered{border:1px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.05)}
+.dm-original-note{font-size:9.5px;color:var(--dim);font-weight:600;margin-top:3px;line-height:1.2}
+.card-filter-indicator{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:900;color:#3b82f6;background:rgba(59,130,246,0.12);padding:2px 6px;border-radius:5px;margin-left:6px;text-transform:uppercase;letter-spacing:0.04em}
+.card-filter-indicator i{font-size:10px}
 .hero-kpis{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}
 .kpi-hero{background:var(--surf);border:1px solid var(--border);border-radius:20px;padding:22px;transition:all .2s;position:relative;overflow:hidden;box-shadow:var(--shadow)}
 .kpi-hero.primary{background:var(--grad-green);border:none;color:#fff}
@@ -775,7 +784,7 @@ html[data-theme="light"] .cmp-custom-input{color-scheme:light}
 
   <!-- KPI DATE FILTER BAR -->
   <div class="kpi-filter-bar" id="kpi-filter-bar">
-    <div class="kpi-filter-label"><i class="ti ti-calendar-filled"></i> Período dos indicadores</div>
+    <div class="kpi-filter-label"><i class="ti ti-calendar-filled"></i> Filtro de período (KPIs + cards + detalhes)</div>
     <div class="kpi-filter-quick">
       <button class="kpi-quick-btn on" data-preset="all" onclick="setKpiFilter('all',this)"><i class="ti ti-infinity"></i> Histórico completo</button>
       <button class="kpi-quick-btn" data-preset="current" onclick="setKpiFilter('current',this)"><i class="ti ti-calendar-month"></i> Este mês</button>
@@ -1195,6 +1204,19 @@ function aggregateFromMonthly(campaign,fromIso,toIso){
   return hasData?{spent,conv}:null;
 }
 
+// Retorna spent/conv/cpa da campanha - filtrado se filtro ativo, ou original se não
+function getCampValues(c){
+  if(!kpiDateFilter){
+    return{spent:c.spent,conv:c.conv,cpa:c.cpa,filtered:false,hasData:true};
+  }
+  const agg=aggregateFromMonthly(c,kpiDateFilter.from,kpiDateFilter.to);
+  if(!agg){
+    return{spent:0,conv:0,cpa:0,filtered:true,hasData:false};
+  }
+  const cpa=agg.conv>0?agg.spent/agg.conv:0;
+  return{spent:agg.spent,conv:agg.conv,cpa,filtered:true,hasData:true};
+}
+
 // ============ KPI DATE FILTER ============
 function setKpiFilter(preset,el){
   document.querySelectorAll(".kpi-quick-btn").forEach(b=>b.classList.remove("on"));
@@ -1238,6 +1260,7 @@ function setKpiFilter(preset,el){
   }
   updateKpiFilterUI();
   updateKpis();
+  render();
 }
 
 function applyKpiCustomDates(){
@@ -1247,6 +1270,7 @@ function applyKpiCustomDates(){
     kpiDateFilter={from,to};
     updateKpiFilterUI();
     updateKpis();
+    render();
   }
 }
 
@@ -2077,10 +2101,26 @@ function render(){
     if(dateTo&&(!c.created_iso||c.created_iso>dateTo))return false;
     return true;
   });
+  const sortByValues=(a,b,key,desc=true)=>{
+    const av=getCampValues(a),bv=getCampValues(b);
+    let vala,valb;
+    if(key==="spent"){vala=av.spent;valb=bv.spent;}
+    else if(key==="cpa"){vala=av.cpa;valb=bv.cpa;}
+    else if(key==="conv"){vala=av.conv;valb=bv.conv;}
+    return desc?valb-vala:vala-valb;
+  };
   rows.sort((a,b)=>{
-    if(sortKey==="cpa"){if(a.cpa===0&&b.cpa===0)return 0;if(a.cpa===0)return 1;if(b.cpa===0)return-1;return a.cpa-b.cpa;}
-    if(sortKey==="cpa_desc")return b.cpa-a.cpa;
-    if(sortKey==="spent_asc")return a.spent-b.spent;
+    if(sortKey==="cpa"){
+      const av=getCampValues(a),bv=getCampValues(b);
+      if(av.cpa===0&&bv.cpa===0)return 0;
+      if(av.cpa===0)return 1;
+      if(bv.cpa===0)return-1;
+      return av.cpa-bv.cpa;
+    }
+    if(sortKey==="cpa_desc")return sortByValues(a,b,"cpa",true);
+    if(sortKey==="spent_asc")return sortByValues(a,b,"spent",false);
+    if(sortKey==="spent")return sortByValues(a,b,"spent",true);
+    if(sortKey==="conv")return sortByValues(a,b,"conv",true);
     if(sortKey==="created")return parseDate(b.created)-parseDate(a.created);
     if(sortKey==="created_asc")return parseDate(a.created)-parseDate(b.created);
     return b[sortKey]-a[sortKey];
@@ -2099,6 +2139,7 @@ function render(){
     const isVaga=c.segment==="vaga";
     const badges=getBadges(c);
     const badgesHtml=badges.map(b=>`<span class="badge ${b.cls}"><i class="ti ${b.icon}"></i> ${b.txt}</span>`).join("");
+    const cv=getCampValues(c);
     
     let detail="";
     if(isOpen){
@@ -2139,11 +2180,11 @@ function render(){
           </div>
         </div>
         <div class="dgrid">
-          <div class="dm">${trendHtml(trendSpent)}<div class="dml">Gasto</div><div class="dmv">R$ ${c.spent.toFixed(0)}</div></div>
-          <div class="dm">${trendHtml(trendCpa)}<div class="dml">CPA</div><div class="dmv ${cpaC(c.cpa)}">${c.cpa?"R$ "+br(c.cpa):"—"}</div></div>
+          <div class="dm ${cv.filtered?'dm-filtered':''}">${!cv.filtered?trendHtml(trendSpent):''}<div class="dml">Gasto${cv.filtered?' <span class="filter-badge-inline">Filtrado</span>':''}</div><div class="dmv">R$ ${cv.hasData?cv.spent.toFixed(0):"0"}</div>${cv.filtered&&!cv.hasData?'<div class="dm-original-note">Sem histórico no período</div>':''}${cv.filtered&&cv.hasData?`<div class="dm-original-note">Total lifetime: R$ ${c.spent.toFixed(0)}</div>`:''}</div>
+          <div class="dm ${cv.filtered?'dm-filtered':''}">${!cv.filtered?trendHtml(trendCpa):''}<div class="dml">CPA${cv.filtered?' <span class="filter-badge-inline">Filtrado</span>':''}</div><div class="dmv ${cpaC(cv.cpa)}">${cv.cpa?"R$ "+br(cv.cpa):"—"}</div>${cv.filtered&&cv.hasData?`<div class="dm-original-note">Total lifetime: ${c.cpa?"R$ "+br(c.cpa):"—"}</div>`:''}</div>
           <div class="dm">${trendHtml(trendCtr)}<div class="dml">CTR</div><div class="dmv ${ctrC(c.ctr)}">${br(c.ctr)}%</div></div>
           <div class="dm">${trendHtml(trendFreq)}<div class="dml">Freq</div><div class="dmv ${frC(c.freq)}">${br(c.freq)}</div></div>
-          <div class="dm">${trendHtml(trendConv)}<div class="dml">Conversas</div><div class="dmv vg">${brNum(c.conv)}</div></div>
+          <div class="dm ${cv.filtered?'dm-filtered':''}">${!cv.filtered?trendHtml(trendConv):''}<div class="dml">Conversas${cv.filtered?' <span class="filter-badge-inline">Filtrado</span>':''}</div><div class="dmv vg">${brNum(cv.conv)}</div>${cv.filtered&&cv.hasData?`<div class="dm-original-note">Total lifetime: ${brNum(c.conv)}</div>`:''}</div>
           <div class="dm"><div class="dml">CPM</div><div class="dmv">R$ ${br(c.cpm)}</div></div>
           <div class="dm"><div class="dml">Cliques</div><div class="dmv">${brNum(c.clicks)}</div></div>
           <div class="dm"><div class="dml">Impressões</div><div class="dmv">${brNum(c.impressions)}</div></div>
@@ -2161,12 +2202,12 @@ function render(){
     return`<div class="row-wrap" data-cid="${c.id}">${detail}<div class="row" onclick="toggleD('${c.id}')">
       <span class="dot ${isActive?'a':'p'}"></span>
       <div class="ico ${isVaga?"ico-v":"ico-c"}"><i class="ti ${c.mtype==="VIDEO"?"ti-player-play":"ti-photo"}"></i></div>
-      <div class="nc"><div class="cname-wrap"><div class="cname" title="${c.name}">${c.name}</div>${badges.length?`<div class="badges">${badgesHtml}</div>`:""}</div><div class="cmeta">${c.tipo} · ${fmtDate(c.created)}${c.status==="ACTIVE"?" · "+daysSince(c.created_iso)+"d":""}</div></div>
-      <div class="v">R$ ${c.spent.toFixed(0)}</div>
-      <div class="v ${cpaC(c.cpa)}">${c.cpa?"R$ "+br(c.cpa):"—"}</div>
+      <div class="nc"><div class="cname-wrap"><div class="cname" title="${c.name}">${c.name}${cv.filtered?'<span class="card-filter-indicator"><i class="ti ti-filter-check"></i>filtrado</span>':''}</div>${badges.length?`<div class="badges">${badgesHtml}</div>`:""}</div><div class="cmeta">${c.tipo} · ${fmtDate(c.created)}${c.status==="ACTIVE"?" · "+daysSince(c.created_iso)+"d":""}</div></div>
+      <div class="v" title="${cv.filtered?'Filtrado. Lifetime: R$ '+c.spent.toFixed(0):''}">R$ ${cv.hasData?cv.spent.toFixed(0):"0"}</div>
+      <div class="v ${cpaC(cv.cpa)}" title="${cv.filtered?'Filtrado. Lifetime: '+(c.cpa?'R$ '+br(c.cpa):'—'):''}">${cv.cpa?"R$ "+br(cv.cpa):"—"}</div>
       <div class="v ${ctrC(c.ctr)}">${br(c.ctr)}%</div>
       <div class="v ${frC(c.freq)}">${br(c.freq)}</div>
-      <div class="v vg">${brNum(c.conv)}</div>
+      <div class="v vg" title="${cv.filtered?'Filtrado. Lifetime: '+brNum(c.conv):''}">${brNum(cv.conv)}</div>
       <div class="v">${brNum(c.clicks)}</div>
       <div class="praca-cell">${c.praca}</div>
     </div></div>`;
